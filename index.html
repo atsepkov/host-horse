@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <link rel="icon" type="image/png" href="/favicon.png">
   <title>host.horse — Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="host.horse — portfolio index of projects and systems by Alexander Tsepkov." />
@@ -33,20 +34,137 @@
 
     .page { width: 100%; max-width: 1120px; margin: 0 auto; }
 
-    header { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; }
+    header { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
 
     .logo-wrap {
+      position: relative;
       width: 200px; height: 200px; border-radius: 24px;
-      display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0;
+      display: flex; justify-content: center; align-items: center; flex-shrink: 0;
       box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255,255,255,0.18);
+      perspective: 1400px;
+      -webkit-perspective: 1400px;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      overflow: hidden;
+      background: none;
+      padding: 0;
+      border-width: 1px;
+      cursor: pointer;
     }
-    .logo-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+    .logo-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transition: transform 0.55s ease;
+    }
+    .logo-wrap.flipped .logo-inner {
+      transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
+    }
+    .logo-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: inherit;
+      overflow: hidden;
+      background: #000;
+    }
+    .logo-face.front { background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); }
+    .logo-face img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .logo-face.back {
+      transform: rotateY(180deg);
+      -webkit-transform: rotateY(180deg);
+    }
 
     .brand-title { display: flex; flex-direction: column; gap: 6px; }
-    .brand-title h1 { font-size: 1.7rem; font-weight: 600; letter-spacing: 0.02em; }
+    .brand-title h1 { font-size: 1.7rem; font-weight: 600; letter-spacing: 0.02em; padding-top: 15px; }
     .tagline { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.17em; color: var(--accent-soft); opacity: 0.9; }
 
-    .intro { margin: 4px 0 18px; color: var(--accent-soft); font-size: 0.95rem; }
+    .intro { margin: 4px 0 12px; color: var(--accent-soft); font-size: 0.95rem; line-height: 1.6; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .action-button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06); color: var(--accent); font-size: 0.82rem; text-decoration: none;
+      letter-spacing: 0.02em; font-weight: 500; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      cursor: pointer;
+      appearance: none;
+      font-family: inherit;
+    }
+    .action-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); box-shadow: 0 16px 32px rgba(0,0,0,0.55); }
+    .action-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    #back-button { display: none; }
+    .page.show-resume #back-button { display: inline-flex; }
+    .page.show-resume #resume-button { display: none; }
+
+    .views { position: relative; }
+    .view { transition: opacity 0.4s ease, transform 0.4s ease; }
+    .projects-view { position: relative; }
+    .resume-view {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+    }
+    .page.show-resume .projects-view {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+    }
+    .page.show-resume .resume-view {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .resume-shell {
+      background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 16px 42px rgba(0,0,0,0.75);
+      padding: 28px 32px;
+      color: var(--accent);
+      margin-top: 16px;
+    }
+    .resume-shell h1,
+    .resume-shell h2,
+    .resume-shell h3,
+    .resume-shell h4,
+    .resume-shell h5,
+    .resume-shell h6 { margin-top: 24px; margin-bottom: 12px; line-height: 1.35; }
+    .resume-shell h1 { font-size: 2rem; }
+    .resume-shell h2 { font-size: 1.4rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px; }
+    .resume-shell h3 { font-size: 1.2rem; }
+    .resume-shell h4 { font-size: 1.05rem; }
+    .resume-shell p { margin-bottom: 12px; line-height: 1.6; color: var(--accent-soft); }
+    .resume-shell ul { margin: 0 0 16px 20px; color: var(--accent-soft); }
+    .resume-shell li { margin-bottom: 8px; line-height: 1.5; }
+    .resume-shell a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.2); }
+    .resume-shell a:hover { border-color: var(--accent); }
+    .resume-shell hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 28px 0; }
 
     .project-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
@@ -66,9 +184,9 @@
     .card-body { padding: 12px 14px 10px; }
     .project-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent-soft); margin-bottom: 4px; opacity: 0.86; }
 
-    .project-name-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-    .project-name { font-size: 1.02rem; font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .project-domain { font-size: 0.72rem; color: var(--accent-soft); opacity: 0.92; }
+    .project-name-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; min-width: 0; }
+    .project-name { font-size: 1.02rem; font-weight: 600; color: var(--accent); line-height: 1.3; white-space: nowrap; }
+    .project-domain { font-size: 0.72rem; color: var(--accent-soft); opacity: 0.92; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
 
     .project-oneliner { font-size: 0.78rem; color: var(--accent-soft); line-height: 1.5; min-height: 2.2em; }
 
@@ -83,27 +201,53 @@
     .project-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.75rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; opacity: 0.95; }
     .project-link:hover { border-color: var(--accent); }
 
-    @media (max-width: 640px){ .brand-title h1 { font-size: 1.4rem; } }
+    @media (max-width: 720px){
+      header { flex-direction: column; text-align: center; }
+      .logo-wrap { width: 160px; height: 160px; }
+      .brand-title { align-items: center; }
+      .brand-title h1 { font-size: 1.4rem; }
+      .actions { justify-content: center; }
+      .resume-shell { padding: 24px 20px; }
+    }
   </style>
 </head>
 <body>
 <div class="page">
   <header>
-    <div class="logo-wrap"><img src="host-horse-logo.png" alt="host.horse logo" /></div>
+    <div class="logo-wrap" id="logo-wrap" role="button" tabindex="0" aria-pressed="false" aria-label="Toggle résumé view">
+      <div class="logo-inner">
+        <div class="logo-face front"><img src="host-horse-logo.png" alt="host.horse logo" /></div>
+        <div class="logo-face back"><img src="alex.jpeg" alt="Portrait of Alexander Tsepkov" /></div>
+      </div>
+    </div>
     <div class="brand-title">
       <!-- <div class="tagline">host.horse</div> -->
       <h1>Alexander Tsepkov Project Portfolio</h1>
-      <p class="intro">Software developer and data geek. Hover a card to see the tech stack. Click to open.</p>
+      <p class="intro">Software developer and data geek with 18+ years delivering web, mobile, and defense systems that ship to production. My focus is on analytics platforms, APIs and developer tooling. My open-source work ranges from compilers and automation frameworks to GIS data products. I weave AI-assisted workflows into day-to-day engineering to accelerate delivery and quality.</p>
+      <div class="actions">
+        <button id="resume-button" class="action-button" type="button" aria-controls="resume-view" aria-expanded="false">View résumé ↗</button>
+        <button id="back-button" class="action-button" type="button">Back to portfolio</button>
+        <a class="action-button" href="mailto:alex@host.horse">Hire me</a>
+      </div>
     </div>
   </header>
 
+  <div class="views">
+    <section aria-label="Projects" class="view projects-view" aria-hidden="false">
+      <div id="project-grid" class="project-grid"></div>
+    </section>
 
-  <section aria-label="Projects">
-    <div id="project-grid" class="project-grid"></div>
-  </section>
+    <section aria-label="Résumé" class="view resume-view" id="resume-view" aria-hidden="true">
+      <div class="resume-shell">
+        <div id="resume-content">Loading résumé…</div>
+      </div>
+    </section>
+  </div>
 </div>
 
-<script>
+<script type="module">
+  import { markdownToHtml } from './lib/markdown-to-html.js';
+
   // Quick SVG placeholder generator so you don't rely on external assets
   function placeholderSVG(text){
     const bg1 = '#101525';
@@ -199,6 +343,78 @@
   ];
 
   const grid = document.getElementById('project-grid');
+
+  const page = document.querySelector('.page');
+  const logoWrap = document.getElementById('logo-wrap');
+  const resumeButton = document.getElementById('resume-button');
+  const backButton = document.getElementById('back-button');
+  const projectsSection = document.querySelector('.projects-view');
+  const resumeSection = document.getElementById('resume-view');
+  const resumeContent = document.getElementById('resume-content');
+  let resumeLoaded = false;
+
+  async function loadResume() {
+    if (resumeLoaded) return;
+    try {
+      const response = await fetch('resume.md');
+      if (!response.ok) throw new Error('resume request failed');
+      const markdown = await response.text();
+      resumeContent.innerHTML = markdownToHtml(markdown);
+      resumeLoaded = true;
+    } catch (err) {
+      console.error(err);
+      resumeContent.innerHTML = '<p>Unable to load the résumé right now. Please refresh or use the email button above.</p>';
+    }
+  }
+
+  const showResume = () => {
+    if (!page.classList.contains('show-resume')) {
+      page.classList.add('show-resume');
+      logoWrap.classList.add('flipped');
+      logoWrap.setAttribute('aria-pressed', 'true');
+      resumeButton?.setAttribute('aria-expanded', 'true');
+      projectsSection?.setAttribute('aria-hidden', 'true');
+      resumeSection?.setAttribute('aria-hidden', 'false');
+      loadResume();
+    }
+  };
+
+  const showProjects = () => {
+    if (page.classList.contains('show-resume')) {
+      page.classList.remove('show-resume');
+      logoWrap.classList.remove('flipped');
+      logoWrap.setAttribute('aria-pressed', 'false');
+      resumeButton?.setAttribute('aria-expanded', 'false');
+      projectsSection?.setAttribute('aria-hidden', 'false');
+      resumeSection?.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  if (resumeButton) {
+    resumeButton.addEventListener('click', showResume);
+  }
+
+  if (backButton) {
+    backButton.addEventListener('click', showProjects);
+  }
+
+  if (logoWrap) {
+    const handleToggle = () => {
+      if (page.classList.contains('show-resume')) {
+        showProjects();
+      } else {
+        showResume();
+      }
+    };
+
+    logoWrap.addEventListener('click', handleToggle);
+    logoWrap.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleToggle();
+      }
+    });
+  }
 
   projects.forEach(p => {
     const card = document.createElement('article');

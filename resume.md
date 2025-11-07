@@ -1,6 +1,6 @@
 # Alexander D Tsepkov
 
-[atsepkov@gmail.com](mailto:atsepkov@gmail.com) · 857-231-3734 · [github.com/atsepkov](https://github.com/atsepkov) · [linkedin.com/in/alextsepkov](https://www.linkedin.com/in/alextsepkov)
+[alex@host.horse](mailto:alex@host.horse) · [github.com/atsepkov](https://github.com/atsepkov) · [linkedin.com/in/alextsepkov](https://www.linkedin.com/in/alextsepkov)
 
 ---
 ## Summary
