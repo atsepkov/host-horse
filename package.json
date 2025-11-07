@@ -1,0 +1,15 @@
+{
+  "name": "host-horse",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "bun server.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
