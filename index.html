@@ -40,13 +40,27 @@
       display: flex; justify-content: center; align-items: center; overflow: hidden; flex-shrink: 0;
       box-shadow: var(--shadow-soft);
     }
-    .logo-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    .logo-wrap img {
+      width: 100%; height: 100%; object-fit: contain; display: block;
+      transition: opacity 0.35s ease;
+    }
 
     .brand-title { display: flex; flex-direction: column; gap: 6px; }
     .brand-title h1 { font-size: 1.7rem; font-weight: 600; letter-spacing: 0.02em; }
     .tagline { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.17em; color: var(--accent-soft); opacity: 0.9; }
 
-    .intro { margin: 4px 0 18px; color: var(--accent-soft); font-size: 0.95rem; }
+    .intro { margin: 4px 0 12px; color: var(--accent-soft); font-size: 0.95rem; line-height: 1.6; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .action-button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 10px 18px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06); color: var(--accent); font-size: 0.82rem; text-decoration: none;
+      letter-spacing: 0.02em; font-weight: 500; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    }
+    .action-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); box-shadow: 0 16px 32px rgba(0,0,0,0.55); }
+    .action-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
     .project-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
@@ -66,9 +80,9 @@
     .card-body { padding: 12px 14px 10px; }
     .project-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent-soft); margin-bottom: 4px; opacity: 0.86; }
 
-    .project-name-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-    .project-name { font-size: 1.02rem; font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .project-domain { font-size: 0.72rem; color: var(--accent-soft); opacity: 0.92; }
+    .project-name-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; min-width: 0; }
+    .project-name { font-size: 1.02rem; font-weight: 600; color: var(--accent); line-height: 1.3; }
+    .project-domain { font-size: 0.72rem; color: var(--accent-soft); opacity: 0.92; flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: right; }
 
     .project-oneliner { font-size: 0.78rem; color: var(--accent-soft); line-height: 1.5; min-height: 2.2em; }
 
@@ -89,11 +103,15 @@
 <body>
 <div class="page">
   <header>
-    <div class="logo-wrap"><img src="host-horse-logo.png" alt="host.horse logo" /></div>
+    <div class="logo-wrap"><img id="site-logo" src="host-horse-logo.png" alt="host.horse logo" /></div>
     <div class="brand-title">
       <!-- <div class="tagline">host.horse</div> -->
       <h1>Alexander Tsepkov Project Portfolio</h1>
-      <p class="intro">Software developer and data geek. Hover a card to see the tech stack. Click to open.</p>
+      <p class="intro">Software developer and data geek with 18+ years delivering web, mobile, and defense systems that ship to production. I lead cross-functional teams rebuilding pricing engines, analytics platforms, and developer tooling that unblock the business. My open-source work ranges from compilers and automation frameworks to GIS data products. I weave AI-assisted workflows into day-to-day engineering to accelerate delivery and quality.</p>
+      <div class="actions">
+        <a id="resume-button" class="action-button" href="resume.html">View résumé ↗</a>
+        <a class="action-button" href="mailto:alex@host.horse">Hire me</a>
+      </div>
     </div>
   </header>
 
@@ -199,6 +217,20 @@
   ];
 
   const grid = document.getElementById('project-grid');
+
+  const logoImg = document.getElementById('site-logo');
+  const resumeButton = document.getElementById('resume-button');
+  if (resumeButton && logoImg) {
+    resumeButton.addEventListener('click', () => {
+      if (logoImg.getAttribute('src') !== 'alex.jpeg') {
+        logoImg.style.opacity = '0';
+        setTimeout(() => {
+          logoImg.setAttribute('src', 'alex.jpeg');
+          logoImg.style.opacity = '1';
+        }, 120);
+      }
+    });
+  }
 
   projects.forEach(p => {
     const card = document.createElement('article');
