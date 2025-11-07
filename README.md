@@ -1,4 +1,4 @@
-# obsidian-plus-landing
+# Host Horse Landing Page
 
 To install dependencies:
 
