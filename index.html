@@ -43,7 +43,12 @@
       border: 1px solid rgba(255,255,255,0.18);
       perspective: 1400px;
       overflow: visible;
+      background: none;
+      padding: 0;
+      border-width: 1px;
+      cursor: pointer;
     }
+    .logo-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
     .logo-inner {
       position: relative;
       width: 100%;
@@ -87,9 +92,66 @@
       background: rgba(255,255,255,0.06); color: var(--accent); font-size: 0.82rem; text-decoration: none;
       letter-spacing: 0.02em; font-weight: 500; transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
       box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+      cursor: pointer;
+      appearance: none;
+      font-family: inherit;
     }
     .action-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); box-shadow: 0 16px 32px rgba(0,0,0,0.55); }
     .action-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    #back-button { display: none; }
+    .page.show-resume #back-button { display: inline-flex; }
+    .page.show-resume #resume-button { display: none; }
+
+    .views { position: relative; }
+    .view { transition: opacity 0.4s ease, transform 0.4s ease; }
+    .projects-view { position: relative; }
+    .resume-view {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(16px);
+      pointer-events: none;
+    }
+    .page.show-resume .projects-view {
+      opacity: 0;
+      transform: translateY(-12px);
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+    }
+    .page.show-resume .resume-view {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .resume-shell {
+      background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 16px 42px rgba(0,0,0,0.75);
+      padding: 28px 32px;
+      color: var(--accent);
+      margin-top: 16px;
+    }
+    .resume-shell h1,
+    .resume-shell h2,
+    .resume-shell h3,
+    .resume-shell h4,
+    .resume-shell h5,
+    .resume-shell h6 { margin-top: 24px; margin-bottom: 12px; line-height: 1.35; }
+    .resume-shell h1 { font-size: 2rem; }
+    .resume-shell h2 { font-size: 1.4rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 8px; }
+    .resume-shell h3 { font-size: 1.2rem; }
+    .resume-shell h4 { font-size: 1.05rem; }
+    .resume-shell p { margin-bottom: 12px; line-height: 1.6; color: var(--accent-soft); }
+    .resume-shell ul { margin: 0 0 16px 20px; color: var(--accent-soft); }
+    .resume-shell li { margin-bottom: 8px; line-height: 1.5; }
+    .resume-shell a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.2); }
+    .resume-shell a:hover { border-color: var(--accent); }
+    .resume-shell hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 28px 0; }
 
     .project-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
@@ -132,13 +194,14 @@
       .brand-title { align-items: center; }
       .brand-title h1 { font-size: 1.4rem; }
       .actions { justify-content: center; }
+      .resume-shell { padding: 24px 20px; }
     }
   </style>
 </head>
 <body>
 <div class="page">
   <header>
-    <div class="logo-wrap" id="logo-wrap">
+    <div class="logo-wrap" id="logo-wrap" role="button" tabindex="0" aria-pressed="false" aria-label="Toggle résumé view">
       <div class="logo-inner">
         <div class="logo-face front"><img src="host-horse-logo.png" alt="host.horse logo" /></div>
         <div class="logo-face back"><img src="alex.jpeg" alt="Portrait of Alexander Tsepkov" /></div>
@@ -149,19 +212,29 @@
       <h1>Alexander Tsepkov Project Portfolio</h1>
       <p class="intro">Software developer and data geek with 18+ years delivering web, mobile, and defense systems that ship to production. I lead cross-functional teams rebuilding pricing engines, analytics platforms, and developer tooling that unblock the business. My open-source work ranges from compilers and automation frameworks to GIS data products. I weave AI-assisted workflows into day-to-day engineering to accelerate delivery and quality.</p>
       <div class="actions">
-        <a id="resume-button" class="action-button" href="resume.html">View résumé ↗</a>
+        <button id="resume-button" class="action-button" type="button" aria-controls="resume-view" aria-expanded="false">View résumé ↗</button>
+        <button id="back-button" class="action-button" type="button">Back to portfolio</button>
         <a class="action-button" href="mailto:alex@host.horse">Hire me</a>
       </div>
     </div>
   </header>
 
+  <div class="views">
+    <section aria-label="Projects" class="view projects-view" aria-hidden="false">
+      <div id="project-grid" class="project-grid"></div>
+    </section>
 
-  <section aria-label="Projects">
-    <div id="project-grid" class="project-grid"></div>
-  </section>
+    <section aria-label="Résumé" class="view resume-view" id="resume-view" aria-hidden="true">
+      <div class="resume-shell">
+        <div id="resume-content">Loading résumé…</div>
+      </div>
+    </section>
+  </div>
 </div>
 
-<script>
+<script type="module">
+  import { markdownToHtml } from './lib/markdown-to-html.js';
+
   // Quick SVG placeholder generator so you don't rely on external assets
   function placeholderSVG(text){
     const bg1 = '#101525';
@@ -258,19 +331,75 @@
 
   const grid = document.getElementById('project-grid');
 
+  const page = document.querySelector('.page');
   const logoWrap = document.getElementById('logo-wrap');
   const resumeButton = document.getElementById('resume-button');
-  const resumeDelayMs = 520;
-  const isModifiedEvent = (event) => event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0;
+  const backButton = document.getElementById('back-button');
+  const projectsSection = document.querySelector('.projects-view');
+  const resumeSection = document.getElementById('resume-view');
+  const resumeContent = document.getElementById('resume-content');
+  let resumeLoaded = false;
 
-  if (resumeButton && logoWrap) {
-    resumeButton.addEventListener('click', (event) => {
-      if (isModifiedEvent(event)) return;
-      event.preventDefault();
+  async function loadResume() {
+    if (resumeLoaded) return;
+    try {
+      const response = await fetch('resume.md');
+      if (!response.ok) throw new Error('resume request failed');
+      const markdown = await response.text();
+      resumeContent.innerHTML = markdownToHtml(markdown);
+      resumeLoaded = true;
+    } catch (err) {
+      console.error(err);
+      resumeContent.innerHTML = '<p>Unable to load the résumé right now. Please refresh or use the email button above.</p>';
+    }
+  }
+
+  const showResume = () => {
+    if (!page.classList.contains('show-resume')) {
+      page.classList.add('show-resume');
       logoWrap.classList.add('flipped');
-      setTimeout(() => {
-        window.location.href = resumeButton.href;
-      }, resumeDelayMs);
+      logoWrap.setAttribute('aria-pressed', 'true');
+      resumeButton?.setAttribute('aria-expanded', 'true');
+      projectsSection?.setAttribute('aria-hidden', 'true');
+      resumeSection?.setAttribute('aria-hidden', 'false');
+      loadResume();
+    }
+  };
+
+  const showProjects = () => {
+    if (page.classList.contains('show-resume')) {
+      page.classList.remove('show-resume');
+      logoWrap.classList.remove('flipped');
+      logoWrap.setAttribute('aria-pressed', 'false');
+      resumeButton?.setAttribute('aria-expanded', 'false');
+      projectsSection?.setAttribute('aria-hidden', 'false');
+      resumeSection?.setAttribute('aria-hidden', 'true');
+    }
+  };
+
+  if (resumeButton) {
+    resumeButton.addEventListener('click', showResume);
+  }
+
+  if (backButton) {
+    backButton.addEventListener('click', showProjects);
+  }
+
+  if (logoWrap) {
+    const handleToggle = () => {
+      if (page.classList.contains('show-resume')) {
+        showProjects();
+      } else {
+        showResume();
+      }
+    };
+
+    logoWrap.addEventListener('click', handleToggle);
+    logoWrap.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        handleToggle();
+      }
     });
   }
 
