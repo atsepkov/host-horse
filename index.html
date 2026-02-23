@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <base href="/" />
   <link rel="icon" type="image/png" href="/favicon.png">
   <title>host.horse — Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -112,21 +113,27 @@
     .action-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); box-shadow: 0 16px 32px rgba(0,0,0,0.55); }
     .action-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+    #back-button, #blog-button { display: inline-flex; }
     #back-button { display: none; }
     .page.show-resume #back-button { display: inline-flex; }
-    .page.show-resume #resume-button { display: none; }
+    .page.show-resume #resume-button,
+    .page.show-resume #blog-button { display: none; }
+    .page.show-blog #back-button { display: inline-flex; }
+    .page.show-blog #resume-button,
+    .page.show-blog #blog-button { display: none; }
 
     .views { position: relative; }
     .view { transition: opacity 0.4s ease, transform 0.4s ease; }
     .projects-view { position: relative; }
-    .resume-view {
+    .resume-view, .blog-view {
       position: absolute;
       inset: 0;
       opacity: 0;
       transform: translateY(16px);
       pointer-events: none;
     }
-    .page.show-resume .projects-view {
+    .page.show-resume .projects-view,
+    .page.show-blog .projects-view {
       opacity: 0;
       transform: translateY(-12px);
       pointer-events: none;
@@ -138,6 +145,17 @@
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
+    }
+    .page.show-blog .blog-view {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .page.show-blog .resume-view,
+    .page.show-resume .blog-view {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .resume-shell {
@@ -167,7 +185,7 @@
     .resume-shell hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 28px 0; }
 
     .project-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
     }
 
     .project-card {
@@ -201,6 +219,62 @@
     .project-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.75rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; opacity: 0.95; }
     .project-link:hover { border-color: var(--accent); }
 
+    /* Blog shell — extends resume-shell */
+    .blog-shell #blog-post-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0; }
+    .blog-shell pre { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    .blog-shell code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.85rem; }
+    .blog-shell :not(pre) > code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; }
+    .blog-shell blockquote { border-left: 3px solid rgba(255,255,255,0.2); padding: 8px 16px; margin: 16px 0; color: var(--accent-soft); }
+    .blog-shell table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .blog-shell th, .blog-shell td { padding: 8px 12px; border: 1px solid rgba(255,255,255,0.08); text-align: left; }
+    .blog-shell th { background: rgba(255,255,255,0.04); font-weight: 600; }
+    .blog-shell ol { margin: 0 0 16px 20px; color: var(--accent-soft); }
+    .blog-shell .markdown-alert { border-radius: 10px; padding: 12px 16px; margin: 16px 0; border: 1px solid rgba(255,255,255,0.08); }
+    .blog-shell .markdown-alert-note { background: rgba(56,132,244,0.08); border-color: rgba(56,132,244,0.2); }
+    .blog-shell .markdown-alert-warning { background: rgba(227,179,65,0.08); border-color: rgba(227,179,65,0.2); }
+    .blog-shell .markdown-alert-important { background: rgba(163,113,247,0.08); border-color: rgba(163,113,247,0.2); }
+    .blog-shell .markdown-alert-title { font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Blog filters */
+    .blog-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .blog-filters .chip { cursor: pointer; transition: background var(--transition-fast), border-color var(--transition-fast); }
+    .blog-filters .chip:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); }
+    .blog-filters .chip.active { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
+    .blog-filters .chip.toggle-more { border-style: dashed; opacity: 0.7; }
+    .blog-filters .chip.toggle-more:hover { opacity: 1; }
+    .blog-filters .chip.hidden-tag { display: none; }
+    .blog-filters.expanded .chip.hidden-tag { display: inline-flex; }
+
+    /* Blog back link */
+    .blog-back { background: none; border: none; color: var(--accent-soft); font-size: 0.85rem; cursor: pointer; padding: 4px 0; margin-bottom: 8px; font-family: inherit; }
+    .blog-back:hover { color: var(--accent); }
+
+    /* Blog post meta */
+    .blog-post-meta { font-size: 0.8rem; color: var(--accent-soft); margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .blog-post-meta .author { font-weight: 500; }
+
+    /* Blog post tags */
+    .blog-post-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .blog-post-tags .chip { cursor: pointer; }
+    .blog-post-tags .chip:hover { background: rgba(255,255,255,0.14); }
+
+    /* Blog related posts */
+    .blog-related { margin-top: 32px; }
+    .blog-shell .blog-related h3 { font-size: 1rem; color: var(--accent-soft); margin: 0 0 12px; font-weight: 500; }
+    .blog-related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .blog-related-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform var(--transition-fast), border-color var(--transition-fast); }
+    .blog-related-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); }
+    .blog-related-card .related-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #0b1020; }
+    .blog-related-card .related-body { padding: 10px 12px; }
+    .blog-related-card .related-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; }
+    .blog-related-card .related-date { font-size: 0.72rem; color: var(--accent-soft); }
+
+    /* Blog pagination */
+    .blog-pagination { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }
+    .blog-pagination button { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--accent); padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: 0.82rem; font-family: inherit; transition: transform var(--transition-fast), border-color var(--transition-fast); }
+    .blog-pagination button:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,0.3); }
+    .blog-pagination button:disabled { opacity: 0.3; cursor: default; }
+
     @media (max-width: 720px){
       header { flex-direction: column; text-align: center; }
       .logo-wrap { width: 160px; height: 160px; }
@@ -226,6 +300,7 @@
       <p class="intro">Software developer and data geek with 18+ years delivering web, mobile, and defense systems that ship to production. My focus is on analytics platforms, APIs and developer tooling. My open-source work ranges from compilers and automation frameworks to GIS data products. I weave AI-assisted workflows into day-to-day engineering to accelerate delivery and quality.</p>
       <div class="actions">
         <button id="resume-button" class="action-button" type="button" aria-controls="resume-view" aria-expanded="false">View résumé ↗</button>
+        <button id="blog-button" class="action-button" type="button">Blog</button>
         <button id="back-button" class="action-button" type="button">Back to portfolio</button>
         <a class="action-button" href="mailto:alex@host.horse">Hire me</a>
       </div>
@@ -240,6 +315,23 @@
     <section aria-label="Résumé" class="view resume-view" id="resume-view" aria-hidden="true">
       <div class="resume-shell">
         <div id="resume-content">Loading résumé…</div>
+      </div>
+    </section>
+
+    <section aria-label="Blog" class="view blog-view" id="blog-view" aria-hidden="true">
+      <div id="blog-list">
+        <div id="blog-filters" class="blog-filters"></div>
+        <div id="blog-grid" class="project-grid"></div>
+        <div id="blog-pagination" class="blog-pagination"></div>
+      </div>
+      <div id="blog-post" style="display:none">
+        <button class="blog-back" id="blog-back-btn">&larr; Back to blog</button>
+        <div class="resume-shell blog-shell">
+          <div class="blog-post-meta" id="blog-post-meta"></div>
+          <div id="blog-post-content"></div>
+          <div class="blog-post-tags" id="blog-post-tags"></div>
+          <div class="blog-related" id="blog-related"></div>
+        </div>
       </div>
     </section>
   </div>
@@ -347,11 +439,39 @@
   const page = document.querySelector('.page');
   const logoWrap = document.getElementById('logo-wrap');
   const resumeButton = document.getElementById('resume-button');
+  const blogButton = document.getElementById('blog-button');
   const backButton = document.getElementById('back-button');
   const projectsSection = document.querySelector('.projects-view');
   const resumeSection = document.getElementById('resume-view');
+  const blogSection = document.getElementById('blog-view');
   const resumeContent = document.getElementById('resume-content');
+  const blogList = document.getElementById('blog-list');
+  const blogPost = document.getElementById('blog-post');
+  const blogGrid = document.getElementById('blog-grid');
+  const blogFilters = document.getElementById('blog-filters');
+  const blogPagination = document.getElementById('blog-pagination');
+  const blogPostMeta = document.getElementById('blog-post-meta');
+  const blogPostContent = document.getElementById('blog-post-content');
+  const blogPostTags = document.getElementById('blog-post-tags');
+  const blogRelated = document.getElementById('blog-related');
+  const blogBackBtn = document.getElementById('blog-back-btn');
   let resumeLoaded = false;
+
+  // Blog state
+  let blogActiveTags = [];
+  let blogOffset = 0;
+  const BLOG_PAGE_SIZE = 20;
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || '';
+  }
 
   async function loadResume() {
     if (resumeLoaded) return;
@@ -367,40 +487,242 @@
     }
   }
 
-  const showResume = () => {
-    if (!page.classList.contains('show-resume')) {
-      page.classList.add('show-resume');
-      logoWrap.classList.add('flipped');
-      logoWrap.setAttribute('aria-pressed', 'true');
-      resumeButton?.setAttribute('aria-expanded', 'true');
-      projectsSection?.setAttribute('aria-hidden', 'true');
-      resumeSection?.setAttribute('aria-hidden', 'false');
-      loadResume();
-    }
+  function clearViewStates() {
+    page.classList.remove('show-resume', 'show-blog');
+    logoWrap.classList.remove('flipped');
+    logoWrap.setAttribute('aria-pressed', 'false');
+    resumeButton?.setAttribute('aria-expanded', 'false');
+    projectsSection?.setAttribute('aria-hidden', 'true');
+    resumeSection?.setAttribute('aria-hidden', 'true');
+    blogSection?.setAttribute('aria-hidden', 'true');
+  }
+
+  const showResume = (pushState = true) => {
+    clearViewStates();
+    page.classList.add('show-resume');
+    logoWrap.classList.add('flipped');
+    logoWrap.setAttribute('aria-pressed', 'true');
+    resumeButton?.setAttribute('aria-expanded', 'true');
+    resumeSection?.setAttribute('aria-hidden', 'false');
+    loadResume();
+    if (pushState) history.pushState({ view: 'resume' }, '', '/resume');
   };
 
-  const showProjects = () => {
-    if (page.classList.contains('show-resume')) {
-      page.classList.remove('show-resume');
-      logoWrap.classList.remove('flipped');
-      logoWrap.setAttribute('aria-pressed', 'false');
-      resumeButton?.setAttribute('aria-expanded', 'false');
-      projectsSection?.setAttribute('aria-hidden', 'false');
-      resumeSection?.setAttribute('aria-hidden', 'true');
-    }
+  const showProjects = (pushState = true) => {
+    clearViewStates();
+    projectsSection?.setAttribute('aria-hidden', 'false');
+    if (pushState) history.pushState({ view: 'projects' }, '', '/');
   };
 
+  const showBlog = (pushState = true) => {
+    clearViewStates();
+    page.classList.add('show-blog');
+    blogSection?.setAttribute('aria-hidden', 'false');
+    blogList.style.display = '';
+    blogPost.style.display = 'none';
+    loadBlogList();
+    if (pushState) history.pushState({ view: 'blog' }, '', '/blog');
+  };
+
+  const showBlogPost = (slug, pushState = true) => {
+    clearViewStates();
+    page.classList.add('show-blog');
+    blogSection?.setAttribute('aria-hidden', 'false');
+    blogList.style.display = 'none';
+    blogPost.style.display = '';
+    loadBlogPost(slug);
+    if (pushState) history.pushState({ view: 'blog-post', slug }, '', `/blog/${slug}`);
+  };
+
+  async function loadBlogList() {
+    try {
+      const params = new URLSearchParams();
+      params.set('limit', BLOG_PAGE_SIZE);
+      params.set('offset', blogOffset);
+      if (blogActiveTags.length) params.set('tags', blogActiveTags.join(','));
+
+      const [postsRes, tagsRes] = await Promise.all([
+        fetch(`/api/posts?${params}`),
+        fetch('/api/tags'),
+      ]);
+      const { items, total } = await postsRes.json();
+      const tags = await tagsRes.json();
+
+      // Render tag filters (collapse beyond 10)
+      const TAG_LIMIT = 10;
+      const wasExpanded = blogFilters.classList.contains('expanded');
+      const hiddenCount = Math.max(0, tags.length - TAG_LIMIT);
+      blogFilters.innerHTML = tags.map((t, i) =>
+        `<span class="chip${blogActiveTags.includes(t.slug) ? ' active' : ''}${i >= TAG_LIMIT ? ' hidden-tag' : ''}" data-tag="${t.slug}">${t.name} (${t.count})</span>`
+      ).join('') + (hiddenCount > 0 ? `<span class="chip toggle-more" id="tag-toggle">+${hiddenCount} more</span>` : '');
+      if (wasExpanded) blogFilters.classList.add('expanded');
+
+      // Render post cards
+      blogGrid.innerHTML = items.map(p => {
+        const thumb = p.thumbnail || placeholderSVG('B');
+        const summary = stripHtml(p.summary || '').slice(0, 120);
+        const tagChips = (p.tags || []).map(t => `<span class='chip'>${t.name}</span>`).join('');
+        return `
+          <article class="project-card" data-slug="${p.slug}">
+            <img class="thumb" src="${thumb}" alt="${p.title} thumbnail"/>
+            <div class="card-body">
+              <div class="project-label">${formatDate(p.created)}</div>
+              <div class="project-name-row">
+                <div class="project-name">${p.title}</div>
+              </div>
+              <div class="project-oneliner">${summary}</div>
+            </div>
+            <div class="hover-area">
+              <div class="tech-label">Tags</div>
+              <div class="tech-chips">${tagChips}</div>
+            </div>
+          </article>`;
+      }).join('');
+
+      // Render pagination
+      const hasPrev = blogOffset > 0;
+      const hasNext = blogOffset + BLOG_PAGE_SIZE < total;
+      blogPagination.innerHTML = (hasPrev || hasNext) ? `
+        <button id="blog-prev" ${hasPrev ? '' : 'disabled'}>Previous</button>
+        <button id="blog-next" ${hasNext ? '' : 'disabled'}>Next</button>
+      ` : '';
+
+    } catch (err) {
+      console.error('Failed to load blog list:', err);
+      blogGrid.innerHTML = '<p style="color:var(--accent-soft)">Unable to load blog posts.</p>';
+    }
+  }
+
+  async function loadBlogPost(slug) {
+    try {
+      const res = await fetch(`/api/posts/${slug}`);
+      if (!res.ok) throw new Error('Post not found');
+      const post = await res.json();
+
+      // If server returned a redirect slug, update URL
+      if (post.redirectedFrom) {
+        history.replaceState({ view: 'blog-post', slug: post.slug }, '', `/blog/${post.slug}`);
+      }
+
+      blogPostMeta.innerHTML = `
+        ${post.author ? `<span class="author">${post.author}</span>` : ''}
+        <span>${formatDate(post.created)}</span>
+      `;
+
+      blogPostContent.innerHTML = post.content || '<p>No content available.</p>';
+
+      // Tags
+      blogPostTags.innerHTML = (post.tags || []).map(t =>
+        `<span class="chip" data-tag="${t.slug}">${t.name}</span>`
+      ).join('');
+
+      // Related posts
+      const related = post.related || [];
+      if (related.length) {
+        blogRelated.innerHTML = `
+          <h3>Related posts</h3>
+          <div class="blog-related-grid">
+            ${related.map(r => `
+              <div class="blog-related-card" data-slug="${r.slug}">
+                <img class="related-thumb" src="${r.thumbnail || placeholderSVG('B')}" alt="${r.title}" />
+                <div class="related-body">
+                  <div class="related-title">${r.title}</div>
+                  <div class="related-date">${formatDate(r.created)}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        blogRelated.innerHTML = '';
+      }
+
+      // Scroll to top of post
+      blogPost.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      console.error('Failed to load blog post:', err);
+      blogPostContent.innerHTML = '<p style="color:var(--accent-soft)">Unable to load this post.</p>';
+    }
+  }
+
+  // Event listeners
   if (resumeButton) {
-    resumeButton.addEventListener('click', showResume);
+    resumeButton.addEventListener('click', () => showResume());
+  }
+
+  if (blogButton) {
+    blogButton.addEventListener('click', () => showBlog());
   }
 
   if (backButton) {
-    backButton.addEventListener('click', showProjects);
+    backButton.addEventListener('click', () => showProjects());
   }
+
+  if (blogBackBtn) {
+    blogBackBtn.addEventListener('click', () => {
+      blogList.style.display = '';
+      blogPost.style.display = 'none';
+      loadBlogList();
+      history.pushState({ view: 'blog' }, '', '/blog');
+    });
+  }
+
+  // Delegated click handlers for blog
+  blogFilters?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    if (chip.id === 'tag-toggle') {
+      const expanded = blogFilters.classList.toggle('expanded');
+      chip.textContent = expanded ? 'Show less' : chip.textContent;
+      return;
+    }
+    const tag = chip.dataset.tag;
+    const idx = blogActiveTags.indexOf(tag);
+    if (idx === -1) blogActiveTags.push(tag);
+    else blogActiveTags.splice(idx, 1);
+    blogOffset = 0;
+    loadBlogList();
+  });
+
+  blogGrid?.addEventListener('click', (e) => {
+    const card = e.target.closest('.project-card');
+    if (!card) return;
+    const slug = card.dataset.slug;
+    if (slug) showBlogPost(slug);
+  });
+
+  blogPostTags?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const tag = chip.dataset.tag;
+    blogActiveTags = [tag];
+    blogOffset = 0;
+    blogList.style.display = '';
+    blogPost.style.display = 'none';
+    history.pushState({ view: 'blog' }, '', '/blog');
+    loadBlogList();
+  });
+
+  blogRelated?.addEventListener('click', (e) => {
+    const card = e.target.closest('.blog-related-card');
+    if (!card) return;
+    const slug = card.dataset.slug;
+    if (slug) showBlogPost(slug);
+  });
+
+  blogPagination?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn || btn.disabled) return;
+    if (btn.id === 'blog-prev') blogOffset = Math.max(0, blogOffset - BLOG_PAGE_SIZE);
+    else if (btn.id === 'blog-next') blogOffset += BLOG_PAGE_SIZE;
+    loadBlogList();
+  });
 
   if (logoWrap) {
     const handleToggle = () => {
       if (page.classList.contains('show-resume')) {
+        showProjects();
+      } else if (page.classList.contains('show-blog')) {
         showProjects();
       } else {
         showResume();
@@ -416,6 +738,30 @@
     });
   }
 
+  // Client-side URL routing
+  function routeFromPath() {
+    const path = location.pathname;
+    if (path === '/blog') {
+      showBlog(false);
+    } else if (path.startsWith('/blog/')) {
+      const slug = path.slice('/blog/'.length);
+      if (slug) showBlogPost(slug, false);
+      else showBlog(false);
+    } else if (path === '/resume') {
+      showResume(false);
+    } else {
+      // Default: show projects without pushing state
+      clearViewStates();
+      projectsSection?.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  window.addEventListener('popstate', () => routeFromPath());
+
+  // Initial route
+  routeFromPath();
+
+  // Render project cards
   projects.forEach(p => {
     const card = document.createElement('article');
     card.className = 'project-card';

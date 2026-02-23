@@ -5,7 +5,9 @@
   "scripts": {
     "start": "bun server.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "blog-system": "file:../blog-system"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },
