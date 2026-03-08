@@ -208,9 +208,31 @@
 
     .project-oneliner { font-size: 0.78rem; color: var(--accent-soft); line-height: 1.5; min-height: 2.2em; }
 
-    .hover-area { padding: 10px 14px 14px; border-top: 1px solid var(--border-subtle); max-height: 0; opacity: 0; transform: translateY(6px);
+    /* Blog card title wrapping */
+    #blog-grid .card-body {
+      height: 118px;
+      padding-bottom: 4px;
+      display: flex;
+      flex-direction: column;
+    }
+    #blog-grid .project-name {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    #blog-grid .project-oneliner {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1.2em), transparent);
+      mask-image: linear-gradient(to bottom, black calc(100% - 1.2em), transparent);
+    }
+
+    .hover-area { padding: 10px 14px 0; border-top: 1px solid var(--border-subtle); max-height: 0; opacity: 0; transform: translateY(6px);
       transition: max-height var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast); pointer-events: none; }
-    .project-card:hover .hover-area, .project-card:focus-within .hover-area { max-height: 320px; opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .project-card:hover .hover-area, .project-card:focus-within .hover-area { max-height: 320px; opacity: 1; transform: translateY(0); pointer-events: auto; padding-bottom: 14px; }
 
     .tech-label { font-size: 0.7rem; color: var(--accent-soft); margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
     .tech-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -220,7 +242,7 @@
     .project-link:hover { border-color: var(--accent); }
 
     /* Blog shell — extends resume-shell */
-    .blog-shell #blog-post-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0; }
+    .blog-shell #blog-post-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0; display: block; }
     .blog-shell pre { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; overflow-x: auto; margin: 16px 0; }
     .blog-shell code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.85rem; }
     .blog-shell :not(pre) > code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; }
@@ -244,6 +266,76 @@
     .blog-filters .chip.toggle-more:hover { opacity: 1; }
     .blog-filters .chip.hidden-tag { display: none; }
     .blog-filters.expanded .chip.hidden-tag { display: inline-flex; }
+
+    /* Foreign theme chips (investing on host-horse) */
+    .chip.theme-investing {
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.25);
+      color: #86efac;
+    }
+    .chip.theme-investing:hover {
+      background: rgba(34,197,94,0.18);
+      border-color: rgba(34,197,94,0.35);
+    }
+    .chip.theme-investing.active {
+      background: rgba(34,197,94,0.22);
+      border-color: rgba(34,197,94,0.4);
+    }
+    .blog-filters .chip.theme-investing:not(.active) { opacity: 0.7; }
+    .blog-filters .chip.theme-investing:not(.active):hover { opacity: 1; }
+
+    /* Theme separator in filter bar */
+    .blog-filters .theme-sep {
+      width: 1px;
+      height: 20px;
+      background: rgba(255,255,255,0.12);
+      align-self: center;
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    /* Foreign post badge */
+    .blog-card-badge {
+      position: absolute; top: 8px; right: 8px;
+      font-size: 0.65rem; padding: 3px 8px; border-radius: 6px;
+      background: rgba(0,0,0,0.55); color: #86efac;
+      pointer-events: none;
+    }
+
+    /* Foreign post banner in detail view */
+    .blog-foreign-banner {
+      font-size: 0.78rem; color: #86efac; padding: 6px 12px;
+      background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 8px; margin-bottom: 12px;
+    }
+    .blog-foreign-banner a { color: #86efac; }
+
+    /* Paywall gate */
+    .paywall-gate {
+      text-align: center;
+      padding: 32px 20px;
+      margin-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .paywall-lock { font-size: 2.5rem; margin-bottom: 12px; }
+    .paywall-gate p { color: var(--accent-soft); font-size: 0.9rem; margin-bottom: 16px; }
+    .paywall-cta {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .paywall-cta:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
 
     /* Blog back link */
     .blog-back { background: none; border: none; color: var(--accent-soft); font-size: 0.85rem; cursor: pointer; padding: 4px 0; margin-bottom: 8px; font-family: inherit; }
@@ -458,6 +550,11 @@
   let resumeLoaded = false;
 
   // Blog state
+  const HOME_THEME = 'software';
+  const FOREIGN_THEME = 'investing';
+  const FOREIGN_SITE = 'investomation.com';
+  const FOREIGN_SITE_URL = 'https://investomation.com';
+  let blogActiveThemes = [HOME_THEME];
   let blogActiveTags = [];
   let blogOffset = 0;
   const BLOG_PAGE_SIZE = 20;
@@ -520,6 +617,10 @@
     blogSection?.setAttribute('aria-hidden', 'false');
     blogList.style.display = '';
     blogPost.style.display = 'none';
+    // Reset theme state to home only
+    blogActiveThemes = [HOME_THEME];
+    blogActiveTags = [];
+    blogOffset = 0;
     loadBlogList();
     if (pushState) history.pushState({ view: 'blog' }, '', '/blog');
   };
@@ -534,36 +635,73 @@
     if (pushState) history.pushState({ view: 'blog-post', slug }, '', `/blog/${slug}`);
   };
 
+  function isPostForeign(postTags) {
+    return !(postTags || []).some(t => t.theme === HOME_THEME);
+  }
+
   async function loadBlogList() {
     try {
       const params = new URLSearchParams();
       params.set('limit', BLOG_PAGE_SIZE);
       params.set('offset', blogOffset);
       if (blogActiveTags.length) params.set('tags', blogActiveTags.join(','));
+      params.set('themes', blogActiveThemes.join(','));
 
       const [postsRes, tagsRes] = await Promise.all([
         fetch(`/api/posts?${params}`),
         fetch('/api/tags'),
       ]);
       const { items, total } = await postsRes.json();
-      const tags = await tagsRes.json();
+      const allTags = await tagsRes.json();
 
-      // Render tag filters (collapse beyond 10)
+      // Sort tags: home + shared first, then separator, then foreign
+      const homeTags = allTags.filter(t => t.theme === HOME_THEME || t.theme === 'shared' || !t.theme);
+      const foreignTags = allTags.filter(t => t.theme === FOREIGN_THEME);
+      const sortedTags = [...homeTags, ...foreignTags];
+      const hasForeign = foreignTags.length > 0;
+
+      // Render tag filters (collapse beyond limits in each group)
       const TAG_LIMIT = 10;
+      const FOREIGN_TAG_LIMIT = 5;
       const wasExpanded = blogFilters.classList.contains('expanded');
-      const hiddenCount = Math.max(0, tags.length - TAG_LIMIT);
-      blogFilters.innerHTML = tags.map((t, i) =>
-        `<span class="chip${blogActiveTags.includes(t.slug) ? ' active' : ''}${i >= TAG_LIMIT ? ' hidden-tag' : ''}" data-tag="${t.slug}">${t.name} (${t.count})</span>`
-      ).join('') + (hiddenCount > 0 ? `<span class="chip toggle-more" id="tag-toggle">+${hiddenCount} more</span>` : '');
+      const homeHiddenCount = Math.max(0, homeTags.length - TAG_LIMIT);
+      const foreignHiddenCount = Math.max(0, foreignTags.length - FOREIGN_TAG_LIMIT);
+      let html = '';
+      homeTags.forEach((t, i) => {
+        const active = blogActiveTags.includes(t.slug) ? ' active' : '';
+        const hidden = i >= TAG_LIMIT ? ' hidden-tag' : '';
+        html += `<span class="chip${active}${hidden}" data-tag="${t.slug}" data-theme="${t.theme || 'shared'}">${t.name} (${t.count})</span>`;
+      });
+      if (homeHiddenCount > 0) {
+        html += `<span class="chip toggle-more" id="tag-toggle" data-collapsed-text="+${homeHiddenCount} more software">+${homeHiddenCount} more software</span>`;
+      }
+      if (hasForeign) {
+        html += `<span class="theme-sep"></span>`;
+        foreignTags.forEach((t, i) => {
+          const active = blogActiveTags.includes(t.slug) ? ' active' : '';
+          const hidden = i >= FOREIGN_TAG_LIMIT ? ' hidden-tag' : '';
+          html += `<span class="chip theme-investing${active}${hidden}" data-tag="${t.slug}" data-theme="${t.theme}">${t.name} (${t.count})</span>`;
+        });
+        if (foreignHiddenCount > 0) {
+          html += `<span class="chip toggle-more theme-investing" id="tag-toggle-foreign" data-collapsed-text="+${foreignHiddenCount} more investing">+${foreignHiddenCount} more investing</span>`;
+        }
+      }
+      blogFilters.innerHTML = html;
       if (wasExpanded) blogFilters.classList.add('expanded');
 
       // Render post cards
       blogGrid.innerHTML = items.map(p => {
         const thumb = p.thumbnail || placeholderSVG('B');
         const summary = stripHtml(p.summary || '').slice(0, 120);
-        const tagChips = (p.tags || []).map(t => `<span class='chip'>${t.name}</span>`).join('');
+        const foreign = isPostForeign(p.tags);
+        const tagChips = (p.tags || []).map(t => {
+          const themeClass = t.theme === FOREIGN_THEME ? ' theme-investing' : '';
+          return `<span class='chip${themeClass}'>${t.name}</span>`;
+        }).join('');
+        const badge = foreign ? `<span class="blog-card-badge">${FOREIGN_SITE}</span>` : '';
         return `
-          <article class="project-card" data-slug="${p.slug}">
+          <article class="project-card" data-slug="${p.slug}" style="position:relative">
+            ${badge}
             <img class="thumb" src="${thumb}" alt="${p.title} thumbnail"/>
             <div class="card-body">
               <div class="project-label">${formatDate(p.created)}</div>
@@ -609,12 +747,30 @@
         <span>${formatDate(post.created)}</span>
       `;
 
-      blogPostContent.innerHTML = post.content || '<p>No content available.</p>';
+      // Foreign banner
+      const foreign = isPostForeign(post.tags);
+      const foreignBanner = foreign
+        ? `<div class="blog-foreign-banner">This post is from <a href="https://${FOREIGN_SITE}/blog/${post.slug}">${FOREIGN_SITE}</a></div>`
+        : '';
 
-      // Tags
-      blogPostTags.innerHTML = (post.tags || []).map(t =>
-        `<span class="chip" data-tag="${t.slug}">${t.name}</span>`
-      ).join('');
+      let paywallGate = '';
+      if (post.paywallTier) {
+        paywallGate = `
+          <div class="paywall-gate">
+            <div class="paywall-lock">🔒</div>
+            <p>This content is free — all I ask is that you create an account to continue reading.</p>
+            <a href="${FOREIGN_SITE_URL}/blog/${post.slug}" class="paywall-cta">
+              Continue reading on Investomation →
+            </a>
+          </div>`;
+      }
+      blogPostContent.innerHTML = foreignBanner + (post.content || '<p>No content available.</p>') + paywallGate;
+
+      // Tags with theme coloring
+      blogPostTags.innerHTML = (post.tags || []).map(t => {
+        const themeClass = t.theme === FOREIGN_THEME ? ' theme-investing' : '';
+        return `<span class="chip${themeClass}" data-tag="${t.slug}" data-theme="${t.theme || 'shared'}">${t.name}</span>`;
+      }).join('');
 
       // Related posts
       const related = post.related || [];
@@ -671,15 +827,34 @@
   blogFilters?.addEventListener('click', (e) => {
     const chip = e.target.closest('.chip');
     if (!chip) return;
-    if (chip.id === 'tag-toggle') {
+    if (chip.id === 'tag-toggle' || chip.id === 'tag-toggle-foreign') {
       const expanded = blogFilters.classList.toggle('expanded');
-      chip.textContent = expanded ? 'Show less' : chip.textContent;
+      for (const id of ['tag-toggle', 'tag-toggle-foreign']) {
+        const btn = blogFilters.querySelector(`#${id}`);
+        if (btn) btn.textContent = expanded ? 'Show less' : btn.dataset.collapsedText;
+      }
       return;
     }
     const tag = chip.dataset.tag;
+    const theme = chip.dataset.theme;
     const idx = blogActiveTags.indexOf(tag);
-    if (idx === -1) blogActiveTags.push(tag);
-    else blogActiveTags.splice(idx, 1);
+    if (idx === -1) {
+      blogActiveTags.push(tag);
+      // Foreign tag click: expand themes to include foreign
+      if (theme === FOREIGN_THEME && !blogActiveThemes.includes(FOREIGN_THEME)) {
+        blogActiveThemes.push(FOREIGN_THEME);
+      }
+    } else {
+      blogActiveTags.splice(idx, 1);
+      // If no foreign tags remain active, remove foreign theme
+      const anyForeignActive = blogActiveTags.some(slug => {
+        const c = blogFilters.querySelector(`.chip[data-tag="${slug}"][data-theme="${FOREIGN_THEME}"]`);
+        return !!c;
+      });
+      if (!anyForeignActive) {
+        blogActiveThemes = [HOME_THEME];
+      }
+    }
     blogOffset = 0;
     loadBlogList();
   });
@@ -695,7 +870,14 @@
     const chip = e.target.closest('.chip');
     if (!chip) return;
     const tag = chip.dataset.tag;
+    const theme = chip.dataset.theme;
     blogActiveTags = [tag];
+    // Expand themes if clicking a foreign tag
+    if (theme === FOREIGN_THEME) {
+      blogActiveThemes = [HOME_THEME, FOREIGN_THEME];
+    } else {
+      blogActiveThemes = [HOME_THEME];
+    }
     blogOffset = 0;
     blogList.style.display = '';
     blogPost.style.display = 'none';
