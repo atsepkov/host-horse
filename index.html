@@ -367,6 +367,53 @@
     .blog-pagination button:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,0.3); }
     .blog-pagination button:disabled { opacity: 0.3; cursor: default; }
 
+    /* Link hover card */
+    .link-hover-card {
+      position: fixed;
+      z-index: 2000;
+      width: 320px;
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.7);
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .link-hover-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+    .link-hover-card-body {
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .link-hover-card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1.3;
+    }
+    .link-hover-card-description {
+      font-size: 0.78rem;
+      color: var(--accent-soft);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .link-hover-card-url {
+      font-size: 0.7rem;
+      color: var(--accent-soft);
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     @media (max-width: 720px){
       header { flex-direction: column; text-align: center; }
       .logo-wrap { width: 160px; height: 160px; }
@@ -426,6 +473,15 @@
         </div>
       </div>
     </section>
+  </div>
+</div>
+
+<div id="link-hover-card" class="link-hover-card" style="display:none">
+  <img id="hover-card-img" src="" alt="" />
+  <div class="link-hover-card-body">
+    <div id="hover-card-title" class="link-hover-card-title"></div>
+    <div id="hover-card-desc" class="link-hover-card-description"></div>
+    <div id="hover-card-url" class="link-hover-card-url"></div>
   </div>
 </div>
 
@@ -800,6 +856,113 @@
       blogPostContent.innerHTML = '<p style="color:var(--accent-soft)">Unable to load this post.</p>';
     }
   }
+
+  // Link hover preview
+  const previewCache = new Map();
+  const hoverCard = document.getElementById('link-hover-card');
+  const hoverCardImg = document.getElementById('hover-card-img');
+  const hoverCardTitle = document.getElementById('hover-card-title');
+  const hoverCardDesc = document.getElementById('hover-card-desc');
+  const hoverCardUrl = document.getElementById('hover-card-url');
+  let hoverHideTimer = null;
+
+  async function getPreviewData(link) {
+    const href = link.getAttribute('href') || '';
+    if (previewCache.has(href)) return previewCache.get(href);
+
+    let data = null;
+    // Internal blog link: /blog/slug, or bare slug (no protocol, no leading slash or just /)
+    const blogMatch = href.match(/^(?:\/blog\/)?([a-z0-9][a-z0-9-]+[a-z0-9])\/?$/);
+    if (blogMatch && !/^https?:/.test(href)) {
+      try {
+        const res = await fetch(`/api/posts/${blogMatch[1]}`);
+        if (res.ok) {
+          const post = await res.json();
+          data = { title: post.title, description: stripHtml(post.summary || '').slice(0, 200), image: post.thumbnail || '', url: '' };
+        }
+      } catch {}
+    }
+    // External link
+    if (!data && /^https?:\/\//.test(href)) {
+      try {
+        const res = await fetch(`/api/unfurl?url=${encodeURIComponent(href)}`);
+        if (res.ok) {
+          const d = await res.json();
+          data = { title: d.title, description: d.description, image: d.image, url: new URL(href).hostname };
+        }
+      } catch {}
+    }
+    if (data) previewCache.set(href, data);
+    return data;
+  }
+
+  function setHoverCardPosition(link) {
+    const rect = link.getBoundingClientRect();
+    const cardW = 320;
+    const pad = 12;
+    let left = rect.left;
+    let top = rect.bottom + pad;
+    // Right edge
+    if (left + cardW > window.innerWidth - pad) left = window.innerWidth - cardW - pad;
+    if (left < pad) left = pad;
+    // Bottom edge — show above if no room below
+    const cardH = hoverCard.offsetHeight || 200;
+    if (top + cardH > window.innerHeight - pad) top = rect.top - cardH - pad;
+    hoverCard.style.left = left + 'px';
+    hoverCard.style.top = top + 'px';
+  }
+
+  function showHoverCard(link) {
+    clearTimeout(hoverHideTimer);
+    getPreviewData(link).then(data => {
+      if (!data) return;
+      hoverCardTitle.textContent = data.title;
+      hoverCardDesc.textContent = data.description;
+      if (data.image) {
+        hoverCardImg.src = data.image;
+        hoverCardImg.style.display = '';
+      } else {
+        hoverCardImg.style.display = 'none';
+      }
+      hoverCardUrl.textContent = data.url;
+      hoverCardUrl.style.display = data.url ? '' : 'none';
+      hoverCard.style.display = '';
+      setHoverCardPosition(link);
+    });
+  }
+
+  function hideHoverCard() {
+    hoverHideTimer = setTimeout(() => { hoverCard.style.display = 'none'; }, 120);
+  }
+
+  function attachHoverListeners() {
+    blogPostContent.addEventListener('mouseover', (e) => {
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      const href = link.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
+      showHoverCard(link);
+    });
+    blogPostContent.addEventListener('mouseout', (e) => {
+      const link = e.target.closest('a[href]');
+      if (link) hideHoverCard();
+    });
+    window.addEventListener('scroll', () => { hoverCard.style.display = 'none'; }, { passive: true });
+    window.addEventListener('touchmove', () => { hoverCard.style.display = 'none'; }, { passive: true });
+  }
+  attachHoverListeners();
+
+  // Intercept internal link clicks in blog post content for SPA navigation
+  blogPostContent.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    const blogMatch = href.match(/^(?:\/blog\/)?([a-z0-9][a-z0-9-]+[a-z0-9])\/?$/);
+    if (blogMatch && !/^https?:/.test(href)) {
+      e.preventDefault();
+      showBlogPost(blogMatch[1]);
+    }
+  });
 
   // Event listeners
   if (resumeButton) {
