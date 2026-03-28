@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <base href="/" />
   <link rel="icon" type="image/png" href="/favicon.png">
   <title>host.horse — Portfolio</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -112,21 +113,27 @@
     .action-button:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.3); box-shadow: 0 16px 32px rgba(0,0,0,0.55); }
     .action-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+    #back-button, #blog-button { display: inline-flex; }
     #back-button { display: none; }
     .page.show-resume #back-button { display: inline-flex; }
-    .page.show-resume #resume-button { display: none; }
+    .page.show-resume #resume-button,
+    .page.show-resume #blog-button { display: none; }
+    .page.show-blog #back-button { display: inline-flex; }
+    .page.show-blog #resume-button,
+    .page.show-blog #blog-button { display: none; }
 
     .views { position: relative; }
     .view { transition: opacity 0.4s ease, transform 0.4s ease; }
     .projects-view { position: relative; }
-    .resume-view {
+    .resume-view, .blog-view {
       position: absolute;
       inset: 0;
       opacity: 0;
       transform: translateY(16px);
       pointer-events: none;
     }
-    .page.show-resume .projects-view {
+    .page.show-resume .projects-view,
+    .page.show-blog .projects-view {
       opacity: 0;
       transform: translateY(-12px);
       pointer-events: none;
@@ -138,6 +145,17 @@
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
+    }
+    .page.show-blog .blog-view {
+      position: relative;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .page.show-blog .resume-view,
+    .page.show-resume .blog-view {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .resume-shell {
@@ -167,7 +185,7 @@
     .resume-shell hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 28px 0; }
 
     .project-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
     }
 
     .project-card {
@@ -190,9 +208,31 @@
 
     .project-oneliner { font-size: 0.78rem; color: var(--accent-soft); line-height: 1.5; min-height: 2.2em; }
 
-    .hover-area { padding: 10px 14px 14px; border-top: 1px solid var(--border-subtle); max-height: 0; opacity: 0; transform: translateY(6px);
+    /* Blog card title wrapping */
+    #blog-grid .card-body {
+      height: 118px;
+      padding-bottom: 4px;
+      display: flex;
+      flex-direction: column;
+    }
+    #blog-grid .project-name {
+      white-space: normal;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    #blog-grid .project-oneliner {
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 1.2em), transparent);
+      mask-image: linear-gradient(to bottom, black calc(100% - 1.2em), transparent);
+    }
+
+    .hover-area { padding: 10px 14px 0; border-top: 1px solid var(--border-subtle); max-height: 0; opacity: 0; transform: translateY(6px);
       transition: max-height var(--transition-fast), opacity var(--transition-fast), transform var(--transition-fast); pointer-events: none; }
-    .project-card:hover .hover-area, .project-card:focus-within .hover-area { max-height: 320px; opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .project-card:hover .hover-area, .project-card:focus-within .hover-area { max-height: 320px; opacity: 1; transform: translateY(0); pointer-events: auto; padding-bottom: 14px; }
 
     .tech-label { font-size: 0.7rem; color: var(--accent-soft); margin-bottom: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
     .tech-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -200,6 +240,179 @@
 
     .project-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 0.75rem; color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; opacity: 0.95; }
     .project-link:hover { border-color: var(--accent); }
+
+    /* Blog shell — extends resume-shell */
+    .blog-shell #blog-post-content img { max-width: 100%; height: auto; border-radius: 12px; margin: 16px 0; display: block; }
+    .blog-shell pre { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 16px; overflow-x: auto; margin: 16px 0; }
+    .blog-shell code { font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.85rem; }
+    .blog-shell :not(pre) > code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; }
+    .blog-shell blockquote { border-left: 3px solid rgba(255,255,255,0.2); padding: 8px 16px; margin: 16px 0; color: var(--accent-soft); }
+    .blog-shell table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+    .blog-shell th, .blog-shell td { padding: 8px 12px; border: 1px solid rgba(255,255,255,0.08); text-align: left; }
+    .blog-shell th { background: rgba(255,255,255,0.04); font-weight: 600; }
+    .blog-shell ol { margin: 0 0 16px 20px; color: var(--accent-soft); }
+    .blog-shell .markdown-alert { border-radius: 10px; padding: 12px 16px; margin: 16px 0; border: 1px solid rgba(255,255,255,0.08); }
+    .blog-shell .markdown-alert-note { background: rgba(56,132,244,0.08); border-color: rgba(56,132,244,0.2); }
+    .blog-shell .markdown-alert-warning { background: rgba(227,179,65,0.08); border-color: rgba(227,179,65,0.2); }
+    .blog-shell .markdown-alert-important { background: rgba(163,113,247,0.08); border-color: rgba(163,113,247,0.2); }
+    .blog-shell .markdown-alert-title { font-weight: 600; margin-bottom: 4px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+    /* Blog filters */
+    .blog-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .blog-filters .chip { cursor: pointer; transition: background var(--transition-fast), border-color var(--transition-fast); }
+    .blog-filters .chip:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); }
+    .blog-filters .chip.active { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
+    .blog-filters .chip.toggle-more { border-style: dashed; opacity: 0.7; }
+    .blog-filters .chip.toggle-more:hover { opacity: 1; }
+    .blog-filters .chip.hidden-tag { display: none; }
+    .blog-filters.expanded .chip.hidden-tag { display: inline-flex; }
+
+    /* Foreign theme chips (investing on host-horse) */
+    .chip.theme-investing {
+      background: rgba(34,197,94,0.12);
+      border-color: rgba(34,197,94,0.25);
+      color: #86efac;
+    }
+    .chip.theme-investing:hover {
+      background: rgba(34,197,94,0.18);
+      border-color: rgba(34,197,94,0.35);
+    }
+    .chip.theme-investing.active {
+      background: rgba(34,197,94,0.22);
+      border-color: rgba(34,197,94,0.4);
+    }
+    .blog-filters .chip.theme-investing:not(.active) { opacity: 0.7; }
+    .blog-filters .chip.theme-investing:not(.active):hover { opacity: 1; }
+
+    /* Theme separator in filter bar */
+    .blog-filters .theme-sep {
+      width: 1px;
+      height: 20px;
+      background: rgba(255,255,255,0.12);
+      align-self: center;
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    /* Foreign post badge */
+    .blog-card-badge {
+      position: absolute; top: 8px; right: 8px;
+      font-size: 0.65rem; padding: 3px 8px; border-radius: 6px;
+      background: rgba(0,0,0,0.55); color: #86efac;
+      pointer-events: none;
+    }
+
+    /* Foreign post banner in detail view */
+    .blog-foreign-banner {
+      font-size: 0.78rem; color: #86efac; padding: 6px 12px;
+      background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 8px; margin-bottom: 12px;
+    }
+    .blog-foreign-banner a { color: #86efac; }
+
+    /* Paywall gate */
+    .paywall-gate {
+      text-align: center;
+      padding: 32px 20px;
+      margin-top: 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .paywall-lock { font-size: 2.5rem; margin-bottom: 12px; }
+    .paywall-gate p { color: var(--accent-soft); font-size: 0.9rem; margin-bottom: 16px; }
+    .paywall-cta {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.16);
+      color: var(--accent);
+      font-size: 0.85rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .paywall-cta:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.3);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    /* Blog back link */
+    .blog-back { background: none; border: none; color: var(--accent-soft); font-size: 0.85rem; cursor: pointer; padding: 4px 0; margin-bottom: 8px; font-family: inherit; }
+    .blog-back:hover { color: var(--accent); }
+
+    /* Blog post meta */
+    .blog-post-meta { font-size: 0.8rem; color: var(--accent-soft); margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .blog-post-meta .author { font-weight: 500; }
+
+    /* Blog post tags */
+    .blog-post-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .blog-post-tags .chip { cursor: pointer; }
+    .blog-post-tags .chip:hover { background: rgba(255,255,255,0.14); }
+
+    /* Blog related posts */
+    .blog-related { margin-top: 32px; }
+    .blog-shell .blog-related h3 { font-size: 1rem; color: var(--accent-soft); margin: 0 0 12px; font-weight: 500; }
+    .blog-related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    .blog-related-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform var(--transition-fast), border-color var(--transition-fast); }
+    .blog-related-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); }
+    .blog-related-card .related-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #0b1020; }
+    .blog-related-card .related-body { padding: 10px 12px; }
+    .blog-related-card .related-title { font-size: 0.85rem; font-weight: 500; margin-bottom: 4px; }
+    .blog-related-card .related-date { font-size: 0.72rem; color: var(--accent-soft); }
+
+    /* Blog pagination */
+    .blog-pagination { display: flex; justify-content: center; gap: 12px; margin-top: 24px; }
+    .blog-pagination button { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--accent); padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: 0.82rem; font-family: inherit; transition: transform var(--transition-fast), border-color var(--transition-fast); }
+    .blog-pagination button:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,0.3); }
+    .blog-pagination button:disabled { opacity: 0.3; cursor: default; }
+
+    /* Link hover card */
+    .link-hover-card {
+      position: fixed;
+      z-index: 2000;
+      width: 320px;
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.7);
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .link-hover-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      display: block;
+    }
+    .link-hover-card-body {
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .link-hover-card-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      line-height: 1.3;
+    }
+    .link-hover-card-description {
+      font-size: 0.78rem;
+      color: var(--accent-soft);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .link-hover-card-url {
+      font-size: 0.7rem;
+      color: var(--accent-soft);
+      opacity: 0.7;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     @media (max-width: 720px){
       header { flex-direction: column; text-align: center; }
@@ -226,6 +439,7 @@
       <p class="intro">Software developer and data geek with 18+ years delivering web, mobile, and defense systems that ship to production. My focus is on analytics platforms, APIs and developer tooling. My open-source work ranges from compilers and automation frameworks to GIS data products. I weave AI-assisted workflows into day-to-day engineering to accelerate delivery and quality.</p>
       <div class="actions">
         <button id="resume-button" class="action-button" type="button" aria-controls="resume-view" aria-expanded="false">View résumé ↗</button>
+        <button id="blog-button" class="action-button" type="button">Blog</button>
         <button id="back-button" class="action-button" type="button">Back to portfolio</button>
         <a class="action-button" href="mailto:alex@host.horse">Hire me</a>
       </div>
@@ -242,6 +456,32 @@
         <div id="resume-content">Loading résumé…</div>
       </div>
     </section>
+
+    <section aria-label="Blog" class="view blog-view" id="blog-view" aria-hidden="true">
+      <div id="blog-list">
+        <div id="blog-filters" class="blog-filters"></div>
+        <div id="blog-grid" class="project-grid"></div>
+        <div id="blog-pagination" class="blog-pagination"></div>
+      </div>
+      <div id="blog-post" style="display:none">
+        <button class="blog-back" id="blog-back-btn">&larr; Back to blog</button>
+        <div class="resume-shell blog-shell">
+          <div class="blog-post-meta" id="blog-post-meta"></div>
+          <div id="blog-post-content"></div>
+          <div class="blog-post-tags" id="blog-post-tags"></div>
+          <div class="blog-related" id="blog-related"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="link-hover-card" class="link-hover-card" style="display:none">
+  <img id="hover-card-img" src="" alt="" />
+  <div class="link-hover-card-body">
+    <div id="hover-card-title" class="link-hover-card-title"></div>
+    <div id="hover-card-desc" class="link-hover-card-description"></div>
+    <div id="hover-card-url" class="link-hover-card-url"></div>
   </div>
 </div>
 
@@ -347,11 +587,44 @@
   const page = document.querySelector('.page');
   const logoWrap = document.getElementById('logo-wrap');
   const resumeButton = document.getElementById('resume-button');
+  const blogButton = document.getElementById('blog-button');
   const backButton = document.getElementById('back-button');
   const projectsSection = document.querySelector('.projects-view');
   const resumeSection = document.getElementById('resume-view');
+  const blogSection = document.getElementById('blog-view');
   const resumeContent = document.getElementById('resume-content');
+  const blogList = document.getElementById('blog-list');
+  const blogPost = document.getElementById('blog-post');
+  const blogGrid = document.getElementById('blog-grid');
+  const blogFilters = document.getElementById('blog-filters');
+  const blogPagination = document.getElementById('blog-pagination');
+  const blogPostMeta = document.getElementById('blog-post-meta');
+  const blogPostContent = document.getElementById('blog-post-content');
+  const blogPostTags = document.getElementById('blog-post-tags');
+  const blogRelated = document.getElementById('blog-related');
+  const blogBackBtn = document.getElementById('blog-back-btn');
   let resumeLoaded = false;
+
+  // Blog state
+  const HOME_THEME = 'software';
+  const FOREIGN_THEME = 'investing';
+  const FOREIGN_SITE = 'investomation.com';
+  const FOREIGN_SITE_URL = 'https://investomation.com';
+  let blogActiveThemes = [HOME_THEME];
+  let blogActiveTags = [];
+  let blogOffset = 0;
+  const BLOG_PAGE_SIZE = 20;
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  }
+
+  function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || '';
+  }
 
   async function loadResume() {
     if (resumeLoaded) return;
@@ -367,40 +640,434 @@
     }
   }
 
-  const showResume = () => {
-    if (!page.classList.contains('show-resume')) {
-      page.classList.add('show-resume');
-      logoWrap.classList.add('flipped');
-      logoWrap.setAttribute('aria-pressed', 'true');
-      resumeButton?.setAttribute('aria-expanded', 'true');
-      projectsSection?.setAttribute('aria-hidden', 'true');
-      resumeSection?.setAttribute('aria-hidden', 'false');
-      loadResume();
-    }
+  function clearViewStates() {
+    page.classList.remove('show-resume', 'show-blog');
+    logoWrap.classList.remove('flipped');
+    logoWrap.setAttribute('aria-pressed', 'false');
+    resumeButton?.setAttribute('aria-expanded', 'false');
+    projectsSection?.setAttribute('aria-hidden', 'true');
+    resumeSection?.setAttribute('aria-hidden', 'true');
+    blogSection?.setAttribute('aria-hidden', 'true');
+  }
+
+  const showResume = (pushState = true) => {
+    clearViewStates();
+    page.classList.add('show-resume');
+    logoWrap.classList.add('flipped');
+    logoWrap.setAttribute('aria-pressed', 'true');
+    resumeButton?.setAttribute('aria-expanded', 'true');
+    resumeSection?.setAttribute('aria-hidden', 'false');
+    loadResume();
+    if (pushState) history.pushState({ view: 'resume' }, '', '/resume');
   };
 
-  const showProjects = () => {
-    if (page.classList.contains('show-resume')) {
-      page.classList.remove('show-resume');
-      logoWrap.classList.remove('flipped');
-      logoWrap.setAttribute('aria-pressed', 'false');
-      resumeButton?.setAttribute('aria-expanded', 'false');
-      projectsSection?.setAttribute('aria-hidden', 'false');
-      resumeSection?.setAttribute('aria-hidden', 'true');
-    }
+  const showProjects = (pushState = true) => {
+    clearViewStates();
+    projectsSection?.setAttribute('aria-hidden', 'false');
+    if (pushState) history.pushState({ view: 'projects' }, '', '/');
   };
 
+  const showBlog = (pushState = true) => {
+    clearViewStates();
+    page.classList.add('show-blog');
+    blogSection?.setAttribute('aria-hidden', 'false');
+    blogList.style.display = '';
+    blogPost.style.display = 'none';
+    // Reset theme state to home only
+    blogActiveThemes = [HOME_THEME];
+    blogActiveTags = [];
+    blogOffset = 0;
+    loadBlogList();
+    if (pushState) history.pushState({ view: 'blog' }, '', '/blog');
+  };
+
+  const showBlogPost = (slug, pushState = true) => {
+    clearViewStates();
+    page.classList.add('show-blog');
+    blogSection?.setAttribute('aria-hidden', 'false');
+    blogList.style.display = 'none';
+    blogPost.style.display = '';
+    loadBlogPost(slug);
+    if (pushState) history.pushState({ view: 'blog-post', slug }, '', `/blog/${slug}`);
+  };
+
+  function isPostForeign(postTags) {
+    return !(postTags || []).some(t => t.theme === HOME_THEME);
+  }
+
+  async function loadBlogList() {
+    try {
+      const params = new URLSearchParams();
+      params.set('limit', BLOG_PAGE_SIZE);
+      params.set('offset', blogOffset);
+      if (blogActiveTags.length) params.set('tags', blogActiveTags.join(','));
+      params.set('themes', blogActiveThemes.join(','));
+
+      const [postsRes, tagsRes] = await Promise.all([
+        fetch(`/api/posts?${params}`),
+        fetch('/api/tags'),
+      ]);
+      const { items, total } = await postsRes.json();
+      const allTags = await tagsRes.json();
+
+      // Sort tags: home + shared first, then separator, then foreign
+      const homeTags = allTags.filter(t => t.theme === HOME_THEME || t.theme === 'shared' || !t.theme);
+      const foreignTags = allTags.filter(t => t.theme === FOREIGN_THEME);
+      const sortedTags = [...homeTags, ...foreignTags];
+      const hasForeign = foreignTags.length > 0;
+
+      // Render tag filters (collapse beyond limits in each group)
+      const TAG_LIMIT = 10;
+      const FOREIGN_TAG_LIMIT = 5;
+      const wasExpanded = blogFilters.classList.contains('expanded');
+      const homeHiddenCount = Math.max(0, homeTags.length - TAG_LIMIT);
+      const foreignHiddenCount = Math.max(0, foreignTags.length - FOREIGN_TAG_LIMIT);
+      let html = '';
+      homeTags.forEach((t, i) => {
+        const active = blogActiveTags.includes(t.slug) ? ' active' : '';
+        const hidden = i >= TAG_LIMIT ? ' hidden-tag' : '';
+        html += `<span class="chip${active}${hidden}" data-tag="${t.slug}" data-theme="${t.theme || 'shared'}">${t.name} (${t.count})</span>`;
+      });
+      if (homeHiddenCount > 0) {
+        html += `<span class="chip toggle-more" id="tag-toggle" data-collapsed-text="+${homeHiddenCount} more software">+${homeHiddenCount} more software</span>`;
+      }
+      if (hasForeign) {
+        html += `<span class="theme-sep"></span>`;
+        foreignTags.forEach((t, i) => {
+          const active = blogActiveTags.includes(t.slug) ? ' active' : '';
+          const hidden = i >= FOREIGN_TAG_LIMIT ? ' hidden-tag' : '';
+          html += `<span class="chip theme-investing${active}${hidden}" data-tag="${t.slug}" data-theme="${t.theme}">${t.name} (${t.count})</span>`;
+        });
+        if (foreignHiddenCount > 0) {
+          html += `<span class="chip toggle-more theme-investing" id="tag-toggle-foreign" data-collapsed-text="+${foreignHiddenCount} more investing">+${foreignHiddenCount} more investing</span>`;
+        }
+      }
+      blogFilters.innerHTML = html;
+      if (wasExpanded) blogFilters.classList.add('expanded');
+
+      // Render post cards
+      blogGrid.innerHTML = items.map(p => {
+        const thumb = p.thumbnail || placeholderSVG('B');
+        const summary = stripHtml(p.summary || '').slice(0, 120);
+        const foreign = isPostForeign(p.tags);
+        const tagChips = (p.tags || []).map(t => {
+          const themeClass = t.theme === FOREIGN_THEME ? ' theme-investing' : '';
+          return `<span class='chip${themeClass}'>${t.name}</span>`;
+        }).join('');
+        const badge = foreign ? `<span class="blog-card-badge">${FOREIGN_SITE}</span>` : '';
+        return `
+          <article class="project-card" data-slug="${p.slug}" style="position:relative">
+            ${badge}
+            <img class="thumb" src="${thumb}" alt="${p.title} thumbnail"/>
+            <div class="card-body">
+              <div class="project-label">${formatDate(p.created)}</div>
+              <div class="project-name-row">
+                <div class="project-name">${p.title}</div>
+              </div>
+              <div class="project-oneliner">${summary}</div>
+            </div>
+            <div class="hover-area">
+              <div class="tech-label">Tags</div>
+              <div class="tech-chips">${tagChips}</div>
+            </div>
+          </article>`;
+      }).join('');
+
+      // Render pagination
+      const hasPrev = blogOffset > 0;
+      const hasNext = blogOffset + BLOG_PAGE_SIZE < total;
+      blogPagination.innerHTML = (hasPrev || hasNext) ? `
+        <button id="blog-prev" ${hasPrev ? '' : 'disabled'}>Previous</button>
+        <button id="blog-next" ${hasNext ? '' : 'disabled'}>Next</button>
+      ` : '';
+
+    } catch (err) {
+      console.error('Failed to load blog list:', err);
+      blogGrid.innerHTML = '<p style="color:var(--accent-soft)">Unable to load blog posts.</p>';
+    }
+  }
+
+  async function loadBlogPost(slug) {
+    try {
+      const res = await fetch(`/api/posts/${slug}`);
+      if (!res.ok) throw new Error('Post not found');
+      const post = await res.json();
+
+      // If server returned a redirect slug, update URL
+      if (post.redirectedFrom) {
+        history.replaceState({ view: 'blog-post', slug: post.slug }, '', `/blog/${post.slug}`);
+      }
+
+      blogPostMeta.innerHTML = `
+        ${post.author ? `<span class="author">${post.author}</span>` : ''}
+        <span>${formatDate(post.created)}</span>
+      `;
+
+      // Foreign banner
+      const foreign = isPostForeign(post.tags);
+      const foreignBanner = foreign
+        ? `<div class="blog-foreign-banner">This post is from <a href="https://${FOREIGN_SITE}/blog/${post.slug}">${FOREIGN_SITE}</a></div>`
+        : '';
+
+      let paywallGate = '';
+      if (post.paywallTier) {
+        paywallGate = `
+          <div class="paywall-gate">
+            <div class="paywall-lock">🔒</div>
+            <p>This content is free — all I ask is that you create an account to continue reading.</p>
+            <a href="${FOREIGN_SITE_URL}/blog/${post.slug}" class="paywall-cta">
+              Continue reading on Investomation →
+            </a>
+          </div>`;
+      }
+      blogPostContent.innerHTML = foreignBanner + (post.content || '<p>No content available.</p>') + paywallGate;
+
+      // Tags with theme coloring
+      blogPostTags.innerHTML = (post.tags || []).map(t => {
+        const themeClass = t.theme === FOREIGN_THEME ? ' theme-investing' : '';
+        return `<span class="chip${themeClass}" data-tag="${t.slug}" data-theme="${t.theme || 'shared'}">${t.name}</span>`;
+      }).join('');
+
+      // Related posts
+      const related = post.related || [];
+      if (related.length) {
+        blogRelated.innerHTML = `
+          <h3>Related posts</h3>
+          <div class="blog-related-grid">
+            ${related.map(r => `
+              <div class="blog-related-card" data-slug="${r.slug}">
+                <img class="related-thumb" src="${r.thumbnail || placeholderSVG('B')}" alt="${r.title}" />
+                <div class="related-body">
+                  <div class="related-title">${r.title}</div>
+                  <div class="related-date">${formatDate(r.created)}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        blogRelated.innerHTML = '';
+      }
+
+      // Scroll to top of post
+      blogPost.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+      console.error('Failed to load blog post:', err);
+      blogPostContent.innerHTML = '<p style="color:var(--accent-soft)">Unable to load this post.</p>';
+    }
+  }
+
+  // Link hover preview
+  const previewCache = new Map();
+  const hoverCard = document.getElementById('link-hover-card');
+  const hoverCardImg = document.getElementById('hover-card-img');
+  const hoverCardTitle = document.getElementById('hover-card-title');
+  const hoverCardDesc = document.getElementById('hover-card-desc');
+  const hoverCardUrl = document.getElementById('hover-card-url');
+  let hoverHideTimer = null;
+
+  async function getPreviewData(link) {
+    const href = link.getAttribute('href') || '';
+    if (previewCache.has(href)) return previewCache.get(href);
+
+    let data = null;
+    // Internal blog link: /blog/slug, or bare slug (no protocol, no leading slash or just /)
+    const blogMatch = href.match(/^(?:\/blog\/)?([a-z0-9][a-z0-9-]+[a-z0-9])\/?$/);
+    if (blogMatch && !/^https?:/.test(href)) {
+      try {
+        const res = await fetch(`/api/posts/${blogMatch[1]}`);
+        if (res.ok) {
+          const post = await res.json();
+          data = { title: post.title, description: stripHtml(post.summary || '').slice(0, 200), image: post.thumbnail || '', url: '' };
+        }
+      } catch {}
+    }
+    // External link
+    if (!data && /^https?:\/\//.test(href)) {
+      try {
+        const res = await fetch(`/api/unfurl?url=${encodeURIComponent(href)}`);
+        if (res.ok) {
+          const d = await res.json();
+          data = { title: d.title, description: d.description, image: d.image, url: new URL(href).hostname };
+        }
+      } catch {}
+    }
+    if (data) previewCache.set(href, data);
+    return data;
+  }
+
+  function setHoverCardPosition(link) {
+    const rect = link.getBoundingClientRect();
+    const cardW = 320;
+    const pad = 12;
+    let left = rect.left;
+    let top = rect.bottom + pad;
+    // Right edge
+    if (left + cardW > window.innerWidth - pad) left = window.innerWidth - cardW - pad;
+    if (left < pad) left = pad;
+    // Bottom edge — show above if no room below
+    const cardH = hoverCard.offsetHeight || 200;
+    if (top + cardH > window.innerHeight - pad) top = rect.top - cardH - pad;
+    hoverCard.style.left = left + 'px';
+    hoverCard.style.top = top + 'px';
+  }
+
+  function showHoverCard(link) {
+    clearTimeout(hoverHideTimer);
+    getPreviewData(link).then(data => {
+      if (!data) return;
+      hoverCardTitle.textContent = data.title;
+      hoverCardDesc.textContent = data.description;
+      if (data.image) {
+        hoverCardImg.src = data.image;
+        hoverCardImg.style.display = '';
+      } else {
+        hoverCardImg.style.display = 'none';
+      }
+      hoverCardUrl.textContent = data.url;
+      hoverCardUrl.style.display = data.url ? '' : 'none';
+      hoverCard.style.display = '';
+      setHoverCardPosition(link);
+    });
+  }
+
+  function hideHoverCard() {
+    hoverHideTimer = setTimeout(() => { hoverCard.style.display = 'none'; }, 120);
+  }
+
+  function attachHoverListeners() {
+    blogPostContent.addEventListener('mouseover', (e) => {
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      const href = link.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
+      showHoverCard(link);
+    });
+    blogPostContent.addEventListener('mouseout', (e) => {
+      const link = e.target.closest('a[href]');
+      if (link) hideHoverCard();
+    });
+    window.addEventListener('scroll', () => { hoverCard.style.display = 'none'; }, { passive: true });
+    window.addEventListener('touchmove', () => { hoverCard.style.display = 'none'; }, { passive: true });
+  }
+  attachHoverListeners();
+
+  // Intercept internal link clicks in blog post content for SPA navigation
+  blogPostContent.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+    const href = link.getAttribute('href') || '';
+    const blogMatch = href.match(/^(?:\/blog\/)?([a-z0-9][a-z0-9-]+[a-z0-9])\/?$/);
+    if (blogMatch && !/^https?:/.test(href)) {
+      e.preventDefault();
+      showBlogPost(blogMatch[1]);
+    }
+  });
+
+  // Event listeners
   if (resumeButton) {
-    resumeButton.addEventListener('click', showResume);
+    resumeButton.addEventListener('click', () => showResume());
+  }
+
+  if (blogButton) {
+    blogButton.addEventListener('click', () => showBlog());
   }
 
   if (backButton) {
-    backButton.addEventListener('click', showProjects);
+    backButton.addEventListener('click', () => showProjects());
   }
+
+  if (blogBackBtn) {
+    blogBackBtn.addEventListener('click', () => {
+      blogList.style.display = '';
+      blogPost.style.display = 'none';
+      loadBlogList();
+      history.pushState({ view: 'blog' }, '', '/blog');
+    });
+  }
+
+  // Delegated click handlers for blog
+  blogFilters?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    if (chip.id === 'tag-toggle' || chip.id === 'tag-toggle-foreign') {
+      const expanded = blogFilters.classList.toggle('expanded');
+      for (const id of ['tag-toggle', 'tag-toggle-foreign']) {
+        const btn = blogFilters.querySelector(`#${id}`);
+        if (btn) btn.textContent = expanded ? 'Show less' : btn.dataset.collapsedText;
+      }
+      return;
+    }
+    const tag = chip.dataset.tag;
+    const theme = chip.dataset.theme;
+    const idx = blogActiveTags.indexOf(tag);
+    if (idx === -1) {
+      blogActiveTags.push(tag);
+      // Foreign tag click: expand themes to include foreign
+      if (theme === FOREIGN_THEME && !blogActiveThemes.includes(FOREIGN_THEME)) {
+        blogActiveThemes.push(FOREIGN_THEME);
+      }
+    } else {
+      blogActiveTags.splice(idx, 1);
+      // If no foreign tags remain active, remove foreign theme
+      const anyForeignActive = blogActiveTags.some(slug => {
+        const c = blogFilters.querySelector(`.chip[data-tag="${slug}"][data-theme="${FOREIGN_THEME}"]`);
+        return !!c;
+      });
+      if (!anyForeignActive) {
+        blogActiveThemes = [HOME_THEME];
+      }
+    }
+    blogOffset = 0;
+    loadBlogList();
+  });
+
+  blogGrid?.addEventListener('click', (e) => {
+    const card = e.target.closest('.project-card');
+    if (!card) return;
+    const slug = card.dataset.slug;
+    if (slug) showBlogPost(slug);
+  });
+
+  blogPostTags?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    const tag = chip.dataset.tag;
+    const theme = chip.dataset.theme;
+    blogActiveTags = [tag];
+    // Expand themes if clicking a foreign tag
+    if (theme === FOREIGN_THEME) {
+      blogActiveThemes = [HOME_THEME, FOREIGN_THEME];
+    } else {
+      blogActiveThemes = [HOME_THEME];
+    }
+    blogOffset = 0;
+    blogList.style.display = '';
+    blogPost.style.display = 'none';
+    history.pushState({ view: 'blog' }, '', '/blog');
+    loadBlogList();
+  });
+
+  blogRelated?.addEventListener('click', (e) => {
+    const card = e.target.closest('.blog-related-card');
+    if (!card) return;
+    const slug = card.dataset.slug;
+    if (slug) showBlogPost(slug);
+  });
+
+  blogPagination?.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn || btn.disabled) return;
+    if (btn.id === 'blog-prev') blogOffset = Math.max(0, blogOffset - BLOG_PAGE_SIZE);
+    else if (btn.id === 'blog-next') blogOffset += BLOG_PAGE_SIZE;
+    loadBlogList();
+  });
 
   if (logoWrap) {
     const handleToggle = () => {
       if (page.classList.contains('show-resume')) {
+        showProjects();
+      } else if (page.classList.contains('show-blog')) {
         showProjects();
       } else {
         showResume();
@@ -416,6 +1083,30 @@
     });
   }
 
+  // Client-side URL routing
+  function routeFromPath() {
+    const path = location.pathname;
+    if (path === '/blog') {
+      showBlog(false);
+    } else if (path.startsWith('/blog/')) {
+      const slug = path.slice('/blog/'.length);
+      if (slug) showBlogPost(slug, false);
+      else showBlog(false);
+    } else if (path === '/resume') {
+      showResume(false);
+    } else {
+      // Default: show projects without pushing state
+      clearViewStates();
+      projectsSection?.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  window.addEventListener('popstate', () => routeFromPath());
+
+  // Initial route
+  routeFromPath();
+
+  // Render project cards
   projects.forEach(p => {
     const card = document.createElement('article');
     card.className = 'project-card';
