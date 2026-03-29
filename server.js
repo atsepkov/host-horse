@@ -47,6 +47,10 @@ function injectMeta(html, meta) {
     /<title>[^<]*<\/title>/,
     `<title>${meta.title} | host.horse</title>`
   );
+  result = result.replace(
+    /<meta name="description" content="[^"]*"\s*\/?>/,
+    `<meta name="description" content="${meta.description}">`
+  );
   result = result.replace("</head>", `${tags}\n</head>`);
   return result;
 }
@@ -253,8 +257,20 @@ const server = Bun.serve({
       return new Response(injectMeta(htmlTemplate, meta), { headers: HTML_HEADERS });
     }
 
+    // Homepage with OG tags
+    if (path === "/") {
+      const meta = {
+        title: "host.horse",
+        description: "Portfolio and blog by Alexander Tsepkov. Software engineering, AI, and data systems.",
+        type: "website",
+        url: siteUrl,
+        canonical: siteUrl,
+      };
+      return new Response(injectMeta(htmlTemplate, meta), { headers: HTML_HEADERS });
+    }
+
     // Static file fallback (existing)
-    const filePath = `.${path === "/" ? "/index.html" : decodeURIComponent(path)}`;
+    const filePath = `.${decodeURIComponent(path)}`;
     if (existsSync(filePath)) return new Response(Bun.file(filePath));
     return new Response("Not found", { status: 404 });
   },
