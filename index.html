@@ -633,6 +633,11 @@
 
   async function loadResume() {
     if (resumeLoaded) return;
+    if (resumeContent.dataset.ssrRendered) {
+      delete resumeContent.dataset.ssrRendered;
+      resumeLoaded = true;
+      return;
+    }
     try {
       const response = await fetch('resume.md');
       if (!response.ok) throw new Error('resume request failed');

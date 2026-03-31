@@ -2,6 +2,10 @@ import { Database } from "bun:sqlite";
 import { mkdirSync, readFileSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { createBlog } from "blog-system";
+import { markdownToHtml } from "./lib/markdown-to-html.js";
+
+const resumeMd = readFileSync("./resume.md", "utf-8");
+const resumeHtml = markdownToHtml(resumeMd);
 
 mkdirSync("data", { recursive: true });
 const db = new Database("data/emails.sqlite");
@@ -207,6 +211,25 @@ function injectBlogIndex(html, posts, allTags, opts) {
     () => `<div id="blog-pagination" class="blog-pagination">${paginationHtml}</div>`
   );
 
+  return html;
+}
+
+function injectResume(html) {
+  // Show resume view
+  html = html.replace('<div class="page">', '<div class="page show-resume">');
+  // Hide projects, show resume
+  html = html.replace('class="view projects-view" aria-hidden="false"',
+    'class="view projects-view" aria-hidden="true"');
+  html = html.replace('id="resume-view" aria-hidden="true"',
+    'id="resume-view" aria-hidden="false"');
+  // Flip logo
+  html = html.replace('<div class="logo-wrap" id="logo-wrap" role="button" tabindex="0" aria-pressed="false"',
+    '<div class="logo-wrap flipped" id="logo-wrap" role="button" tabindex="0" aria-pressed="true"');
+  // Inject rendered resume content
+  html = html.replace(
+    '<div id="resume-content">Loading résumé…</div>',
+    () => `<div id="resume-content" data-ssr-rendered="1">${resumeHtml}</div>`
+  );
   return html;
 }
 
@@ -435,6 +458,20 @@ const server = Bun.serve({
       };
       let html = injectMeta(htmlTemplate, meta);
       html = injectBlogIndex(html, items, allTags, { offset, total, activeTags });
+      return new Response(html, { headers: HTML_HEADERS });
+    }
+
+    // Resume page
+    if (path === "/resume") {
+      const meta = {
+        title: "Résumé — Alexander Tsepkov",
+        description: "18+ years delivering web, mobile, and defense systems. Focus on analytics platforms, APIs, and developer tooling.",
+        type: "website",
+        url: `${siteUrl}/resume`,
+        canonical: `${siteUrl}/resume`,
+      };
+      let html = injectMeta(htmlTemplate, meta);
+      html = injectResume(html);
       return new Response(html, { headers: HTML_HEADERS });
     }
 
