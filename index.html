@@ -182,6 +182,7 @@
     .resume-shell li { margin-bottom: 8px; line-height: 1.5; }
     .resume-shell a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.2); }
     .resume-shell a:hover { border-color: var(--accent); }
+    .resume-shell strong { color: var(--accent); }
     .resume-shell hr { border: none; border-top: 1px solid rgba(255,255,255,0.12); margin: 28px 0; }
 
     .project-grid {
@@ -966,6 +967,17 @@
       showHoverCard(link);
     });
     blogPostContent.addEventListener('mouseout', (e) => {
+      const link = e.target.closest('a[href]');
+      if (link) hideHoverCard();
+    });
+    resumeContent.addEventListener('mouseover', (e) => {
+      const link = e.target.closest('a[href]');
+      if (!link) return;
+      const href = link.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('javascript:')) return;
+      showHoverCard(link);
+    });
+    resumeContent.addEventListener('mouseout', (e) => {
       const link = e.target.closest('a[href]');
       if (link) hideHoverCard();
     });

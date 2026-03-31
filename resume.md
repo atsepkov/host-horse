@@ -18,6 +18,15 @@
 - **AI/ML:** Cursor, Aider, Copilot/Codex, SageMaker
 
 ---
+
+## AI Experience
+- **Built [Obsidian-powered productivity system](https://obsidianpl.us/) with embedded AI**. *Integrated DeepSeek R1 API directly into markdown notes, following OpenAI-compatible standards so the AI backend is hot-swappable between providers; always-on AI research at $2/month instead of $50-80 through OpenAI.*
+- **Used vibe-coding to ship features in unfamiliar environments (Obsidian API, TypeScript plugin ecosystem) without outsourcing architecture or judgment**. *AI compressed the learning curve on framework boilerplate while I owned the design decisions, avoiding the AI-slop failure mode where developers let models drive architecture they don't understand.*
+- **Used deterministic scaffolding to constrain AI output.** *Defined interfaces, tests, and module boundaries upfront so AI fills in implementation within a fixed structure rather than generating architecture; the bounding box is human-designed, only the interior is AI-generated.*
+- **Prototyped a GPT-4V + Puppeteer + custom state-machine scraper pipeline to extract structured deal data from unstructured Facebook real estate listings.** *GPT-4V passed spatial reasoning but failed on numerical accuracy, disqualifying it for financial data extraction where "occasionally wrong" equals useless.*
+- **Experimented with agentic orchestration patterns to improve AI reliability without increasing slop.** *Used adversarial agents to converge on correctness; sequential pipelines to keep each agent focused and prevent context pollution; tight context engineering to control what each agent sees.*
+
+
 ## Professional Experience
 
 ### Xometry — Senior Engineering Manager
