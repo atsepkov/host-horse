@@ -259,6 +259,7 @@
 
     /* Blog filters */
     .blog-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .blog-filters a.chip { text-decoration: none; color: var(--accent); }
     .blog-filters .chip { cursor: pointer; transition: background var(--transition-fast), border-color var(--transition-fast); }
     .blog-filters .chip:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.2); }
     .blog-filters .chip.active { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
@@ -347,6 +348,7 @@
 
     /* Blog post tags */
     .blog-post-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .blog-post-tags a.chip { text-decoration: none; color: var(--accent); }
     .blog-post-tags .chip { cursor: pointer; }
     .blog-post-tags .chip:hover { background: rgba(255,255,255,0.14); }
 
@@ -354,6 +356,7 @@
     .blog-related { margin-top: 32px; }
     .blog-shell .blog-related h3 { font-size: 1rem; color: var(--accent-soft); margin: 0 0 12px; font-weight: 500; }
     .blog-related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    a.blog-related-card { text-decoration: none; color: inherit; }
     .blog-related-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: 12px; overflow: hidden; cursor: pointer; transition: transform var(--transition-fast), border-color var(--transition-fast); }
     .blog-related-card:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.14); }
     .blog-related-card .related-thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; background: #0b1020; }
@@ -366,6 +369,8 @@
     .blog-pagination button { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--accent); padding: 8px 18px; border-radius: 999px; cursor: pointer; font-size: 0.82rem; font-family: inherit; transition: transform var(--transition-fast), border-color var(--transition-fast); }
     .blog-pagination button:hover:not(:disabled) { transform: translateY(-1px); border-color: rgba(255,255,255,0.3); }
     .blog-pagination button:disabled { opacity: 0.3; cursor: default; }
+    .blog-pagination-link { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--accent); padding: 8px 18px; border-radius: 999px; font-size: 0.82rem; font-family: inherit; text-decoration: none; transition: transform var(--transition-fast), border-color var(--transition-fast); }
+    .blog-pagination-link:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.3); }
 
     /* Link hover card */
     .link-hover-card {
@@ -673,10 +678,16 @@
     blogSection?.setAttribute('aria-hidden', 'false');
     blogList.style.display = '';
     blogPost.style.display = 'none';
-    // Reset theme state to home only
+    if (!pushState) {
+      // SSR initial load — sync state from URL
+      const params = new URLSearchParams(location.search);
+      blogActiveTags = (params.get('tags') || '').split(',').filter(Boolean);
+      blogOffset = parseInt(params.get('offset') || '0', 10);
+    } else {
+      blogActiveTags = [];
+      blogOffset = 0;
+    }
     blogActiveThemes = [HOME_THEME];
-    blogActiveTags = [];
-    blogOffset = 0;
     loadBlogList();
     if (pushState) history.pushState({ view: 'blog' }, '', '/blog');
   };
@@ -696,6 +707,10 @@
   }
 
   async function loadBlogList() {
+    if (blogGrid.dataset.ssrRendered) {
+      delete blogGrid.dataset.ssrRendered;
+      return;
+    }
     try {
       const params = new URLSearchParams();
       params.set('limit', BLOG_PAGE_SIZE);
@@ -788,6 +803,7 @@
   }
 
   async function loadBlogPost(slug) {
+    if (blogPostContent.dataset.slug === slug) return;
     try {
       const res = await fetch(`/api/posts/${slug}`);
       if (!res.ok) throw new Error('Post not found');
@@ -821,6 +837,7 @@
           </div>`;
       }
       blogPostContent.innerHTML = foreignBanner + (post.content || '<p>No content available.</p>') + paywallGate;
+      blogPostContent.dataset.slug = slug;
 
       // Tags with theme coloring
       blogPostTags.innerHTML = (post.tags || []).map(t => {

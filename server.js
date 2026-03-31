@@ -40,6 +40,176 @@ function jsonResponse(data, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: JSON_HEADERS });
 }
 
+function escHtml(str) {
+  return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function stripHtmlTags(html) {
+  return String(html).replace(/<[^>]*>/g, "");
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
+
+function injectBlogPost(html, post, related) {
+  // Show blog view, show post panel, hide list
+  html = html.replace('<div class="page">', '<div class="page show-blog">');
+  html = html.replace(
+    '<div id="blog-post" style="display:none">',
+    '<div id="blog-post">'
+  );
+  html = html.replace('<div id="blog-list">', '<div id="blog-list" style="display:none">');
+
+  // Replace back button with <a> link
+  html = html.replace(
+    /<button class="blog-back" id="blog-back-btn">[^<]*<\/button>/,
+    '<a href="/blog" class="blog-back" id="blog-back-btn">&larr; Back to blog</a>'
+  );
+
+  // Inject post meta (author + date)
+  const metaHtml = `${post.author ? `<span class="author">${escHtml(post.author)}</span>` : ""}<span>${formatDate(post.created)}</span>`;
+  html = html.replace(
+    '<div class="blog-post-meta" id="blog-post-meta"></div>',
+    () => `<div class="blog-post-meta" id="blog-post-meta">${metaHtml}</div>`
+  );
+
+  // Inject content with optional foreign banner and paywall gate
+  const foreign = !(post.tags || []).some((t) => t.theme === HOME_THEME);
+  const foreignBanner = foreign
+    ? `<div class="blog-foreign-banner">This post is from <a href="https://investomation.com/blog/${post.slug}">investomation.com</a></div>`
+    : "";
+  const paywallGate = post.paywallTier
+    ? `<div class="paywall-gate"><div class="paywall-lock">🔒</div><p>This content is free — all I ask is that you create an account to continue reading.</p><a href="${FOREIGN_SITE_URL}/blog/${post.slug}" class="paywall-cta">Continue reading on Investomation →</a></div>`
+    : "";
+  const contentHtml = foreignBanner + (post.content || "<p>No content available.</p>") + paywallGate;
+  html = html.replace(
+    '<div id="blog-post-content"></div>',
+    () => `<div id="blog-post-content" data-slug="${escHtml(post.slug)}">${contentHtml}</div>`
+  );
+
+  // Inject tag chips as links
+  const tagsHtml = (post.tags || [])
+    .map((t) => {
+      const themeClass = t.theme === FOREIGN_THEME ? " theme-investing" : "";
+      return `<a href="/blog?tags=${encodeURIComponent(t.slug)}" class="chip${themeClass}" data-tag="${escHtml(t.slug)}" data-theme="${escHtml(t.theme || "shared")}">${escHtml(t.name)}</a>`;
+    })
+    .join("");
+  html = html.replace(
+    '<div class="blog-post-tags" id="blog-post-tags"></div>',
+    () => `<div class="blog-post-tags" id="blog-post-tags">${tagsHtml}</div>`
+  );
+
+  // Inject related posts as link cards
+  const relatedHtml =
+    related && related.length
+      ? `<h3>Related posts</h3><div class="blog-related-grid">${related
+          .map(
+            (r) =>
+              `<a href="/blog/${encodeURIComponent(r.slug)}" class="blog-related-card"><img class="related-thumb" src="${escHtml(r.thumbnail || "")}" alt="${escHtml(r.title)}" /><div class="related-body"><div class="related-title">${escHtml(r.title)}</div><div class="related-date">${formatDate(r.created)}</div></div></a>`
+          )
+          .join("")}</div>`
+      : "";
+  html = html.replace(
+    '<div class="blog-related" id="blog-related"></div>',
+    () => `<div class="blog-related" id="blog-related">${relatedHtml}</div>`
+  );
+
+  return html;
+}
+
+function injectBlogIndex(html, posts, allTags, opts) {
+  const { offset = 0, total = 0, activeTags = [] } = opts;
+
+  // Show blog view
+  html = html.replace('<div class="page">', '<div class="page show-blog">');
+
+  // Inject tag filter chips as links
+  const TAG_LIMIT = 10;
+  const FOREIGN_TAG_LIMIT = 5;
+  const homeTags = allTags.filter((t) => t.theme === HOME_THEME || t.theme === "shared" || !t.theme);
+  const foreignTags = allTags.filter((t) => t.theme === FOREIGN_THEME);
+  const homeHiddenCount = Math.max(0, homeTags.length - TAG_LIMIT);
+  const foreignHiddenCount = Math.max(0, foreignTags.length - FOREIGN_TAG_LIMIT);
+
+  function tagUrl(tagSlug) {
+    const newTags = activeTags.includes(tagSlug)
+      ? activeTags.filter((s) => s !== tagSlug)
+      : [...activeTags, tagSlug];
+    return newTags.length ? `/blog?tags=${newTags.map(encodeURIComponent).join(",")}` : "/blog";
+  }
+
+  let filtersHtml = "";
+  homeTags.forEach((t, i) => {
+    const active = activeTags.includes(t.slug) ? " active" : "";
+    const hidden = i >= TAG_LIMIT ? " hidden-tag" : "";
+    filtersHtml += `<a href="${tagUrl(t.slug)}" class="chip${active}${hidden}" data-tag="${escHtml(t.slug)}" data-theme="${escHtml(t.theme || "shared")}">${escHtml(t.name)} (${t.count})</a>`;
+  });
+  if (homeHiddenCount > 0) {
+    filtersHtml += `<span class="chip toggle-more" id="tag-toggle" data-collapsed-text="+${homeHiddenCount} more software">+${homeHiddenCount} more software</span>`;
+  }
+  if (foreignTags.length > 0) {
+    filtersHtml += `<span class="theme-sep"></span>`;
+    foreignTags.forEach((t, i) => {
+      const active = activeTags.includes(t.slug) ? " active" : "";
+      const hidden = i >= FOREIGN_TAG_LIMIT ? " hidden-tag" : "";
+      filtersHtml += `<a href="${tagUrl(t.slug)}" class="chip theme-investing${active}${hidden}" data-tag="${escHtml(t.slug)}" data-theme="${escHtml(t.theme)}">${escHtml(t.name)} (${t.count})</a>`;
+    });
+    if (foreignHiddenCount > 0) {
+      filtersHtml += `<span class="chip toggle-more theme-investing" id="tag-toggle-foreign" data-collapsed-text="+${foreignHiddenCount} more investing">+${foreignHiddenCount} more investing</span>`;
+    }
+  }
+  html = html.replace(
+    '<div id="blog-filters" class="blog-filters"></div>',
+    () => `<div id="blog-filters" class="blog-filters">${filtersHtml}</div>`
+  );
+
+  // Inject post cards as links
+  const cardsHtml = posts
+    .map((p) => {
+      const summary = stripHtmlTags(p.summary || "").slice(0, 120);
+      const isForeign = !(p.tags || []).some((t) => t.theme === HOME_THEME);
+      const badge = isForeign ? `<span class="blog-card-badge">investomation.com</span>` : "";
+      const tagChips = (p.tags || [])
+        .map((t) => {
+          const themeClass = t.theme === FOREIGN_THEME ? " theme-investing" : "";
+          return `<span class="chip${themeClass}">${escHtml(t.name)}</span>`;
+        })
+        .join("");
+      return `<a href="/blog/${encodeURIComponent(p.slug)}" class="project-card" style="position:relative;text-decoration:none;color:inherit">${badge}<img class="thumb" src="${escHtml(p.thumbnail || "")}" alt="${escHtml(p.title)} thumbnail"/><div class="card-body"><div class="project-label">${formatDate(p.created)}</div><div class="project-name-row"><div class="project-name">${escHtml(p.title)}</div></div><div class="project-oneliner">${escHtml(summary)}</div></div><div class="hover-area"><div class="tech-label">Tags</div><div class="tech-chips">${tagChips}</div></div></a>`;
+    })
+    .join("");
+  html = html.replace(
+    '<div id="blog-grid" class="project-grid"></div>',
+    () => `<div id="blog-grid" class="project-grid" data-ssr-rendered="1">${cardsHtml}</div>`
+  );
+
+  // Inject pagination as links
+  const pageSize = 20;
+  const hasPrev = offset > 0;
+  const hasNext = offset + pageSize < total;
+  let paginationHtml = "";
+  if (hasPrev || hasNext) {
+    if (hasPrev) {
+      const prevOffset = Math.max(0, offset - pageSize);
+      const prevParams = activeTags.length ? `tags=${activeTags.map(encodeURIComponent).join(",")}&offset=${prevOffset}` : `offset=${prevOffset}`;
+      paginationHtml += `<a href="/blog?${prevParams}" class="blog-pagination-link">Previous</a>`;
+    }
+    if (hasNext) {
+      const nextOffset = offset + pageSize;
+      const nextParams = activeTags.length ? `tags=${activeTags.map(encodeURIComponent).join(",")}&offset=${nextOffset}` : `offset=${nextOffset}`;
+      paginationHtml += `<a href="/blog?${nextParams}" class="blog-pagination-link">Next</a>`;
+    }
+  }
+  html = html.replace(
+    '<div id="blog-pagination" class="blog-pagination"></div>',
+    () => `<div id="blog-pagination" class="blog-pagination">${paginationHtml}</div>`
+  );
+
+  return html;
+}
+
 function injectMeta(html, meta) {
   const tags = blog.renderMetaTags(meta);
   // Replace title and inject OG tags before </head>
@@ -229,7 +399,7 @@ const server = Bun.serve({
       }
 
       if (slug) {
-        // Single post — inject post-specific meta
+        // Single post — inject post-specific meta + SSR content
         const post = await blog.getPost(slug);
         if (post) {
           const meta = blog.getPostMeta(post);
@@ -237,7 +407,10 @@ const server = Bun.serve({
           if (getCanonicalSite(post.tags || []) === "foreign") {
             meta.canonical = `${FOREIGN_SITE_URL}/blog/${post.slug}`;
           }
-          return new Response(injectMeta(htmlTemplate, meta), { headers: HTML_HEADERS });
+          const related = blog.getRelatedPosts(slug, { limit: 6 });
+          let html = injectMeta(htmlTemplate, meta);
+          html = injectBlogPost(html, post, related);
+          return new Response(html, { headers: HTML_HEADERS });
         }
         // Try fuzzy match
         const found = blog.findSlug(slug);
@@ -246,7 +419,13 @@ const server = Bun.serve({
         }
       }
 
-      // Blog index or not-found slug — serve with generic blog meta
+      // Blog index or not-found slug — serve with SSR content
+      const tagsParam = url.searchParams.get("tags");
+      const activeTags = tagsParam ? tagsParam.split(",").filter(Boolean) : [];
+      const offset = parseInt(url.searchParams.get("offset") || "0", 10);
+      const { items, total } = blog.listPosts({ limit: 20, offset, tags: activeTags, themes: [HOME_THEME] });
+      const allTags = blog.listTags({ filterTags: activeTags });
+
       const meta = {
         title: "Blog",
         description: "Thoughts on software engineering, data systems, and projects by Alexander Tsepkov.",
@@ -254,7 +433,9 @@ const server = Bun.serve({
         url: `${siteUrl}/blog`,
         canonical: `${siteUrl}/blog`,
       };
-      return new Response(injectMeta(htmlTemplate, meta), { headers: HTML_HEADERS });
+      let html = injectMeta(htmlTemplate, meta);
+      html = injectBlogIndex(html, items, allTags, { offset, total, activeTags });
+      return new Response(html, { headers: HTML_HEADERS });
     }
 
     // Homepage with OG tags
